@@ -1,31 +1,493 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@font-face {
+  font-family: 'DECENTRACODE';
+  src: url('/Geist-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-display: swap;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/JetBrainsMono-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-display: swap;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: 0 0% 98%;   /* Soft neutral background #fdfdfd */
+  --foreground: 0 0% 0%;   /* Black */
+  --card: 0 0% 100%;       /* White */
+  --card-foreground: 0 0% 0%; /* Black */
+  --popover: 0 0% 100%;    /* White */
+  --popover-foreground: 0 0% 0%; /* Black */
+  --primary: 88 100% 54%;  /* Neon Green #39FF14 */
+  --neon-glow: 88 100% 54%; /* Neon Green for glow effects */
+  --primary-foreground: 0 0% 0%; /* Black */
+  --secondary: 240 4.8% 95.9%; /* Light Gray */
+  --secondary-foreground: 240 5.9% 10%; /* Dark Gray */
+  --muted: 240 4.8% 95.9%; /* Light Gray */
+  --muted-foreground: 240 3.8% 46.1%; /* Medium Gray */
+  --accent: 0 0% 0%;       /* Black */
+  --accent-foreground: 0 0% 100%; /* White */
+  --destructive: 0 84.2% 60.2%; /* Red */
+  --destructive-foreground: 0 0% 98%; /* White */
+  --border: 0 0% 90%;      /* Subtle border #e5e5e5 */
+  --input: 0 0% 90%;       /* Light Gray Input */
+  --ring: 135 70% 57%;     /* Neon Green Ring */
+  --radius: 0.75rem;       /* 12px rounding */
+
+  /* Vercel-inspired color scales for depth and hierarchy */
+  --geist-background-1: 0 0% 98%; /* Default background #fdfdfd */
+  --geist-background-2: 0 0% 96%;  /* Subtle differentiation */
+
+  --geist-component-bg-1: 0 0% 100%; /* Default component background */
+  --geist-component-bg-2: 0 0% 98%; /* Hover component background */
+  --geist-component-bg-3: 0 0% 96%; /* Active component background */
+
+  --geist-border-1: 0 0% 90%; /* Default border #e5e5e5 */
+  --geist-border-2: 0 0% 88%; /* Hover border */
+  --geist-border-3: 0 0% 86%; /* Active border */
+
+  --geist-ui-element-1: 0 0% 15%; /* Prominent UI element */
+  --geist-ui-element-2: 0 0% 10%; /* More prominent UI element */
+
+  --geist-text-secondary: 0 0% 40%; /* Secondary text */
+  --geist-text-primary: 0 0% 0%;   /* Primary text */
+
+  --shadow-x: 0px;
+  --shadow-y: 4px;
+  --shadow-blur: 12px;
+  --shadow-spread: 0px;
+  --shadow-opacity: 0.05;
+  --shadow-color: 0 0% 0%; /* Black for shadows */
+
+  /* Chart colors */
+  --chart-1: 135 70% 57%; /* Neon Green */
+  --chart-2: 210 80% 50%; /* Blue */
 }
 
-body,
-html {
-  height: 100%;
+.dark {
+  --background: 0 0% 5%;    /* Dark background */
+  --foreground: 0 0% 98%;   /* White */
+  --card: 0 0% 10%;         /* Dark card */
+  --card-foreground: 0 0% 98%; /* White */
+  --popover: 0 0% 10%;      /* Dark popover */
+  --popover-foreground: 0 0% 98%; /* White */
+  --primary: 88 100% 54%;   /* Neon Green #39FF14 */
+  --neon-glow: 88 100% 54%; /* Neon Green for glow effects */
+  --primary-foreground: 0 0% 0%; /* Black */
+  --secondary: 240 3.7% 15.9%; /* Dark Gray */
+  --secondary-foreground: 240 5% 64.9%; /* Light Gray */
+  --muted: 240 3.7% 15.9%; /* Dark Gray */
+  --muted-foreground: 240 5% 64.9%; /* Light Gray */
+  --accent: 0 0% 98%;     /* White */
+  --accent-foreground: 0 0% 3.9%; /* Black */
+  --destructive: 0 62.8% 30.6%; /* Dark Red */
+  --destructive-foreground: 0 0% 98%; /* White */
+  --border: 240 3.7% 15.9%; /* Dark Gray Border */
+  --input: 240 3.7% 15.9%; /* Dark Gray Input */
+  --ring: 135 70% 57%;    /* Neon Green Ring */
+
+  /* Vercel-inspired color scales for depth and hierarchy (Dark Mode) */
+  --geist-background-1: 0 0% 5%;   /* Default background */
+  --geist-background-2: 0 0% 8%;   /* Subtle differentiation */
+
+  --geist-component-bg-1: 0 0% 10%;  /* Default component background */
+  --geist-component-bg-2: 0 0% 12%;  /* Hover component background */
+  --geist-component-bg-3: 0 0% 14%;  /* Active component background */
+
+  --geist-border-1: 0 0% 20%; /* Default border */
+  --geist-border-2: 0 0% 22%; /* Hover border */
+  --geist-border-3: 0 0% 24%; /* Active border */
+
+  --geist-ui-element-1: 0 0% 85%; /* Prominent UI element */
+  --geist-ui-element-2: 0 0% 90%; /* More prominent UI element */
+
+  --geist-text-secondary: 215 20.2% 65.1%; /* Secondary text (#9CA3AF) */
+  --geist-text-primary: 0 0% 98%; /* Primary text */
+
+  --shadow-x: 0px;
+  --shadow-y: 4px;
+  --shadow-blur: 12px;
+  --shadow-spread: 0px;
+  --shadow-opacity: 0.15;
+  --shadow-color: 0 0% 100%; /* White for shadows in dark mode */
+
+  /* Chart colors */
+  --chart-1: 135 70% 57%; /* Neon Green */
+  --chart-2: 210 80% 50%; /* Blue */
+}
+
+@theme inline {
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "Geist Mono", monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Vercel-inspired color scales */
+  --color-geist-background-1: var(--geist-background-1);
+  --color-geist-background-2: var(--geist-background-2);
+  --color-geist-component-bg-1: var(--geist-component-bg-1);
+  --color-geist-component-bg-2: var(--geist-component-bg-2);
+  --color-geist-component-bg-3: var(--geist-component-bg-3);
+  --color-geist-border-1: var(--geist-border-1);
+  --color-geist-border-2: var(--geist-border-2);
+  --color-geist-border-3: var(--geist-border-3);
+  --color-geist-ui-element-1: var(--geist-ui-element-1);
+  --color-geist-ui-element-2: var(--geist-ui-element-2);
+  --color-geist-text-secondary: var(--geist-text-secondary);
+  --color-geist-text-primary: var(--geist-text-primary);
+
+  /* Chart colors */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-quality: var(--chart-1);
+  --color-vulnerabilities: var(--chart-2);
+
+  /* computed shadow variables below - do not modify */
+  --shadow-2xs: var(--shadow-x) var(--shadow-y)
+    color-mix(in srgb, hsl(var(--shadow-color)) calc(var(--shadow-opacity) * 100%), transparent);
+  --shadow-xs: var(--shadow-x) var(--shadow-y) var(--shadow-blur) var(--shadow-spread)
+    color-mix(in srgb, hsl(var(--shadow-color)) calc(var(--shadow-opacity) * 100%), transparent);
+  --shadow-sm: var(--shadow-x) var(--shadow-y) calc(var(--shadow-blur) * 1.5) var(--shadow-spread)
+    color-mix(in srgb, hsl(var(--shadow-color)) calc(var(--shadow-opacity) * 100%), transparent);
+  --shadow-md: calc(var(--shadow-x) * 2) calc(var(--shadow-y) * 2) calc(var(--shadow-blur) * 3)
+    calc(var(--shadow-spread) - 1px)
+    color-mix(in srgb, hsl(var(--shadow-color)) calc(var(--shadow-opacity) * 100%), transparent);
+  --shadow-lg: calc(var(--shadow-x) * 4) calc(var(--shadow-y) * 4) calc(var(--shadow-blur) * 5)
+    calc(var(--shadow-spread) - 3px)
+    color-mix(in srgb, hsl(var(--shadow-color)) calc(var(--shadow-opacity) * 100%), transparent);
+  --shadow-xl: calc(var(--shadow-x) * 6) calc(var(--shadow-y) * 6) calc(var(--shadow-blur) * 7)
+    calc(var(--shadow-spread) - 5px)
+    color-mix(in srgb, hsl(var(--shadow-color)) calc(var(--shadow-opacity) * 100%), transparent);
+  --shadow-2xl: calc(var(--shadow-x) * 8) calc(var(--shadow-y) * 8) calc(max(0px, var(--shadow-blur) * 9 - 8px))
+    calc(var(--shadow-spread) - 12px)
+    color-mix(in srgb, hsl(var(--shadow-color)) calc(var(--shadow-opacity) * 250%), transparent);
+  --shadow: var(--shadow-md);
+  --color-shadow-color: var(--shadow-color);
+  --shadow-opacity: var(--shadow-opacity);
+  --shadow-spread: var(--shadow-spread);
+  --shadow-blur: var(--shadow-blur);
+  --shadow-y: var(--shadow-y);
+  --shadow-x: var(--shadow-x);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+/* Add custom animations for DecentraCode */
+@layer utilities {
+  /* Pulsing animations */
+  @keyframes pulse-glow {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 hsla(var(--primary), 0.7);
+    }
+    50% {
+      box-shadow: 0 0 0 10px hsla(var(--primary), 0);
+    }
+  }
+
+  @keyframes pulse-dot {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.3;
+    }
+  }
+
+  /* Slide animations */
+  @keyframes slide-down {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Number counter animation */
+  @keyframes count-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Particle burst */
+  @keyframes particle-burst {
+    0% {
+      opacity: 1;
+      transform: translate(0, 0) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(var(--tx), var(--ty)) scale(0);
+    }
+  }
+
+  /* Confetti */
+  @keyframes confetti-fall {
+    to {
+      transform: translateY(100vh) rotateZ(360deg);
+      opacity: 0;
+    }
+  }
+
+  /* Shimmer loading */
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  /* Bounce animations */
+  @keyframes bounce-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  /* Flip animation */
+  @keyframes flip {
+    0% {
+      transform: rotateY(0deg);
+    }
+    100% {
+      transform: rotateY(180deg);
+    }
+  }
+
+  /* Shake animation */
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-5px);
+    }
+    75% {
+      transform: translateX(5px);
+    }
+  }
+
+  /* Typewriter effect */
+  @keyframes typewriter {
+    from {
+      width: 0;
+    }
+    to {
+      width: 100%;
+    }
+  }
+
+  /* Added spin animation for coin icons */
+  @keyframes spin {
+    from {
+      transform: rotateZ(0deg);
+    }
+    to {
+      transform: rotateZ(360deg);
+    }
+  }
+
+  /* Utility classes */
+  .animate-pulse-glow {
+    animation: pulse-glow 2s infinite;
+  }
+
+  .animate-pulse-dot {
+    animation: pulse-dot 2s infinite;
+  }
+
+  .animate-slide-down {
+    animation: slide-down 0.3s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+  }
+
+  .animate-slide-in-right {
+    animation: slide-in-right 0.3s ease-out;
+  }
+
+  .animate-count-up {
+    animation: count-up 0.5s ease-out;
+  }
+
+  .animate-particle-burst {
+    animation: particle-burst 1s ease-out forwards;
+  }
+
+  .animate-confetti {
+    animation: confetti-fall 3s ease-in forwards;
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent, hsla(var(--primary), 0.1), transparent);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  .animate-bounce-in {
+    animation: bounce-in 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .animate-flip {
+    animation: flip 0.6s ease-in-out;
+  }
+
+  .animate-shake {
+    animation: shake 0.5s ease-in-out;
+  }
+
+  .animate-typewriter {
+    animation: typewriter 2s steps(40, end);
+  }
+
+  .animate-spin {
+    animation: spin 2s linear infinite;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.7s ease-out forwards;
+  }
+
+  @keyframes line-graph-draw {
+    from {
+      stroke-dashoffset: var(--path-length);
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .animate-line-graph {
+    animation: line-graph-draw 2s ease-out forwards;
+  }
+}
+
+
+/* Alternative: More aggressive spacing reduction */
+/* Uncomment these if you want even tighter spacing */
+
+
+section {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+section + section {
+  padding-top: 1.5rem;
+}
+
+.section-header,
+.section-title {
+  margin-bottom: 1rem;
+}
+
+.card-grid {
+  margin-top: 1.5rem;
+}
+
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

@@ -1,36 +1,35 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { CopilotKit } from "@copilotkit/react-core";
-import "./globals.css";
-import "@copilotkit/react-ui/styles.css";
+import type React from "react"
+import type { Metadata } from "next"
+import { Analytics } from "@vercel/analytics/next"
+import "./globals.css"
+import { Toaster } from "@/components/ui/toaster";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+import localFont from 'next/font/local';
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const decentracodeFont = localFont({
+  src: '../../public/Geist-VariableFont_wght.ttf', 
+  variable: '--font-decentracode',
+  weight: '100 900',
 });
 
 export const metadata: Metadata = {
-  title: "Nosana Mastra Agent Kit",
-  description: "An example of using CopilotKit with Mastra agents.",
-};
+  title: "DecentraCode - Code Review Platform",
+  description: "AI-powered code review and credit-based economy",
+  generator: "v0.app",
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <CopilotKit runtimeUrl="/api/copilotkit" agent="weatherAgent">
-          {children}
-        </CopilotKit>
+    <html lang="en" className={`${decentracodeFont.variable}`}>
+      <body className={`font-decentracode antialiased`}>
+        {children}
+        <Analytics />
+        <Toaster />
       </body>
     </html>
-  );
+  )
 }

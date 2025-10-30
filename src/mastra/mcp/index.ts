@@ -1,13 +1,23 @@
-import { MCPServer } from "@mastra/mcp"
-import { weatherTool } from "../tools";
-import { weatherAgent } from "../agents";
+
+import { MCPServer } from "@mastra/mcp";
+import { 
+  repositoryReaderTool,
+  getReviewerUsernameTool,
+  getReviewerReputationTool,
+  getReviewerLanguageExpertiseTool,
+  getReviewerAvailabilityTool,
+} from "../tools";
 
 export const server = new MCPServer({
-  name: "My Custom Server",
+  name: "Code Review Agent Server",
   version: "1.0.0",
-  tools: { weatherTool },
-  agents: { weatherAgent }, // this agent will become tool "ask_weatherAgent"
-  // workflows: {
-  // dataProcessingWorkflow, // this workflow will become tool "run_dataProcessingWorkflow"
-  // }
+  tools: {
+    "code-analyzer": repositoryReaderTool,
+    "code-reviewer-analyzer": {
+      getReviewerUsername: getReviewerUsernameTool,
+      getReviewerReputation: getReviewerReputationTool,
+      getReviewerLanguageExpertise: getReviewerLanguageExpertiseTool,
+      getReviewerAvailability: getReviewerAvailabilityTool,
+    },
+  },
 });

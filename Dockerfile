@@ -4,6 +4,13 @@ FROM node:lts AS build
 
 RUN corepack enable
 
+# Install build tools for native modules
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
@@ -26,7 +33,10 @@ RUN --mount=type=cache,target=/pnpm/store \
 COPY package.json ./
 
 RUN --mount=type=cache,target=/pnpm/store \
-  pnpm install --frozen-lockfile --prod --offline
+  pnpm install --frozen-lockfile --offline
+
+# Rebuild native modules with build tools available
+RUN pnpm rebuild
 
 COPY . .
 
