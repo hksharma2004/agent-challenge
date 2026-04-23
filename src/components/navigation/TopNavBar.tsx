@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Code2, Bell, LogOut, ChevronDown, Menu, X } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useUser } from "@/hooks/use-user";
-import { supabase } from "@/lib/supabase";
 import Image from "next/image";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -17,13 +16,13 @@ export function TopNavBar() {
   const isMobile = useIsMobile();
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/signin");
+    // Mock signOut
+    router.push("/");
   };
 
-  const displayName = user?.user_metadata.full_name || "User";
+  const displayName = user?.user_metadata?.full_name || "User";
   const displayAvatar =
-    user?.user_metadata.avatar_url || "/placeholder-user.jpg";
+    user?.user_metadata?.avatar_url || "/placeholder-user.jpg";
 
   return (
     <nav className="bg-white shadow-sm transition-all duration-200 ease-out sticky top-0 z-50 h-16 flex items-center shadow-[0_0_20px_rgba(34,197,94,0.1)]">

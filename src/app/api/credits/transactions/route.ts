@@ -1,42 +1,16 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { Database } from '@/types/schema';
+import pool from '@/lib/db';
 
 export async function GET(req: Request) {
-  const supabase = createRouteHandlerClient<Database>({ cookies: () => cookies() });
   const { searchParams } = new URL(req.url);
   const limit = parseInt(searchParams.get('limit') || '10', 10);
+  const userId = '00000000-0000-0000-0000-000000000000'; // Hardcoded Guest User ID
 
   try {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session) {
-      return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    const { data: transactions, error } = await supabase
-      .from('credit_transactions')
-      .select('*')
-      .eq('user_id', session.user.id)
-      .order('timestamp', { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      console.error('Error fetching credit transactions:', error);
-      return new NextResponse(
-        JSON.stringify({ error: 'Failed to fetch credit transactions' }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
+    const { rows: transactions } = await pool.query(
+      'SELECT * FROM credit_transactions WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2',
+      [userId, limit]
+    );
 
     return NextResponse.json(transactions);
   } catch (e) {
@@ -50,3 +24,4 @@ export async function GET(req: Request) {
     );
   }
 }
+

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { Agent } from "@mastra/core/agent";
 import { Memory } from "@mastra/memory";
 import { LibSQLStore } from "@mastra/libsql";
-import { createOllama } from "ollama-ai-provider-v2";
+import { createOpenAI } from "@ai-sdk/openai";
 import {
   getReviewerReputationTool,
   getReviewerLanguageExpertiseTool,
@@ -13,8 +13,9 @@ import {
 } from "../tools/reviewer-tools";
 import pool from "@/lib/db";
 
-const ollama = createOllama({
-  baseURL: process.env.NOS_OLLAMA_API_URL || process.env.OLLAMA_API_URL,
+const openai = createOpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_API_URL,
 });
 
 export const Reviewer = z.object({
@@ -35,7 +36,7 @@ const ReviewerMatcherInputSchema = z.object({
 
 export const reviewerMatcherAgent = new Agent({
   name: "Reviewer Matcher Agent",
-  model: ollama(process.env.NOS_MODEL_NAME_AT_ENDPOINT || process.env.MODEL_NAME_AT_ENDPOINT || "qwen3:8b"),
+  model: openai(process.env.MODEL_NAME || "Qwen3.5-27B-AWQ-4bit") as any,
   instructions: `
 You are an expert project manager responsible for assigning code reviews. Your task is to select the best reviewers for a given submission based on their staking tier, reputation, and language expertise.
 

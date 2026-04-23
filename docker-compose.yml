@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+      - "4111:4111"
+    environment:
+      - DATABASE_URL=postgres://dev:devpass@postgres:5432/decentracode
+      - REDIS_URL=redis://redis:6379
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: decentracode
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: devpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev -d decentracode"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

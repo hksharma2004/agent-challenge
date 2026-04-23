@@ -16,32 +16,35 @@ export async function POST(req: NextRequest) {
     }
 
 
-    type MastraWorkflowId = "repoAnalysisWorkflow" | "repoReaderWorkflow" | "reviewerInfoWorkflow";
-    const workflowId: MastraWorkflowId = 'reviewerInfoWorkflow';
-    const reviewerInfoWorkflowDef = mastra.getWorkflow(workflowId);
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          const run = await reviewerInfoWorkflowDef.createRunAsync();
+          const workflowStream = await run.stream({
+            inputData: { reviewerId },
+          });
 
-    if (!reviewerInfoWorkflowDef) {
-      return NextResponse.json({ error: 'Reviewer info workflow not found.' }, { status: 500 });
-    }
+          for await (const event of workflowStream.fullStream) {
+            const chunk = JSON.stringify(event) + '\n';
+            controller.enqueue(encoder.encode(chunk));
+          }
 
-
-    const run = await reviewerInfoWorkflowDef.createRunAsync();
-    const result = await run.start({
-      inputData: { reviewerId },
+          controller.close();
+        } catch (error: any) {
+          console.error('Streaming error:', error);
+          controller.error(error);
+        }
+      },
     });
 
-
-    if (result.status === "failed") {
-      return NextResponse.json({ error: `Workflow failed: ${result.error?.message}` }, { status: 500 });
-    }
-    if (result.status === "suspended") {
-      return NextResponse.json({ error: `Workflow suspended: ${JSON.stringify(result.suspendPayload)}` }, { status: 500 });
-    }
-    if (!result.result.success) {
-      return NextResponse.json({ error: `Workflow failed: ${result.result.error || 'Unknown error'}` }, { status: 500 });
-    }
-
-    return NextResponse.json(result.result); 
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
 
   } catch (error: any) {
     console.error('Error executing reviewer info workflow:', error);

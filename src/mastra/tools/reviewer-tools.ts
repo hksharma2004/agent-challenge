@@ -1,6 +1,6 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
-import { supabase } from '@/lib/supabase'; 
+import pool from '@/lib/db'; 
 
 export const getReviewerUsernameTool = createTool({
   id: 'get-reviewer-username',
@@ -13,19 +13,15 @@ export const getReviewerUsernameTool = createTool({
   }),
   execute: async ({ context }) => {
     const { reviewerId } = context;
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('username')
-      .eq('id', reviewerId)
-      .single();
+    const { rows } = await pool.query(
+      'SELECT username FROM users WHERE id = $1',
+      [reviewerId]
+    );
 
-    if (error) {
-      throw new Error(`Failed to fetch username: ${error.message}`);
-    }
-    if (!data) {
+    if (rows.length === 0) {
       throw new Error(`Reviewer with ID ${reviewerId} not found.`);
     }
-    return { username: data.username };
+    return { username: rows[0].username };
   },
 });
 
@@ -40,19 +36,15 @@ export const getReviewerReputationTool = createTool({
   }),
   execute: async ({ context }) => {
     const { reviewerId } = context;
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('reputation')
-      .eq('id', reviewerId)
-      .single();
+    const { rows } = await pool.query(
+      'SELECT reputation_score FROM users WHERE id = $1',
+      [reviewerId]
+    );
 
-    if (error) {
-      throw new Error(`Failed to fetch reputation: ${error.message}`);
-    }
-    if (!data) {
+    if (rows.length === 0) {
       throw new Error(`Reviewer with ID ${reviewerId} not found.`);
     }
-    return { reputation_score: data.reputation };
+    return { reputation_score: rows[0].reputation_score };
   },
 });
 
@@ -67,19 +59,15 @@ export const getReviewerLanguageExpertiseTool = createTool({
   }),
   execute: async ({ context }) => {
     const { reviewerId } = context;
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('languages')
-      .eq('id', reviewerId)
-      .single();
+    const { rows } = await pool.query(
+      'SELECT language_expertise FROM users WHERE id = $1',
+      [reviewerId]
+    );
 
-    if (error) {
-      throw new Error(`Failed to fetch language expertise: ${error.message}`);
-    }
-    if (!data) {
+    if (rows.length === 0) {
       throw new Error(`Reviewer with ID ${reviewerId} not found.`);
     }
-    return { language_expertise: data.languages || [] };
+    return { language_expertise: rows[0].language_expertise || [] };
   },
 });
 
@@ -94,19 +82,15 @@ export const getReviewerAvailabilityTool = createTool({
   }),
   execute: async ({ context }) => {
     const { reviewerId } = context;
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('availability')
-      .eq('id', reviewerId)
-      .single();
+    const { rows } = await pool.query(
+      'SELECT is_available FROM users WHERE id = $1',
+      [reviewerId]
+    );
 
-    if (error) {
-      throw new Error(`Failed to fetch availability: ${error.message}`);
-    }
-    if (!data) {
+    if (rows.length === 0) {
       throw new Error(`Reviewer with ID ${reviewerId} not found.`);
     }
-    return { is_available: data.availability };
+    return { is_available: rows[0].is_available };
   },
 });
 
@@ -121,18 +105,15 @@ export const getReviewerStakedCreditsTool = createTool({
   }),
   execute: async ({ context }) => {
     const { reviewerId } = context;
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('creditsstaked')
-      .eq('id', reviewerId)
-      .single();
+    const { rows } = await pool.query(
+      'SELECT staked_credits FROM users WHERE id = $1',
+      [reviewerId]
+    );
 
-    if (error) {
-      throw new Error(`Failed to fetch staked credits: ${error.message}`);
-    }
-    if (!data) {
+    if (rows.length === 0) {
       throw new Error(`Reviewer with ID ${reviewerId} not found.`);
     }
-    return { staked_credits: data.creditsstaked };
+    return { staked_credits: rows[0].staked_credits };
   },
 });
+

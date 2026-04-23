@@ -12,8 +12,7 @@ import { ProfileAchievements } from "@/components/profile/ProfileAchievements"
 import { ProfileTierInfo } from "@/components/profile/ProfileTierInfo"
 import { UserProfile } from "@/types/schema"
 import { StakingTier } from "@/types/enums"
-import { useUser } from "@/hooks/use-user"
-import { supabase } from "@/lib/supabase"
+import { useUser } from "@/hooks/use-user";
 
 export default function Profile() {
   const { user, loading: authLoading } = useUser()
@@ -22,52 +21,23 @@ export default function Profile() {
 
   useEffect(() => {
     async function fetchUserProfile() {
-      if (user) {
-
-        const { data: upsertData, error: upsertError } = await supabase
-          .from('profiles')
-          .upsert({
-            id: user.id,
-            username: user.user_metadata?.full_name || user.user_metadata?.name || user.email,
-            avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture,
-            email: user.email,
-            reputation: 0,
-            level: 'Beginner',
-            creditsavailable: 0,
-            creditsstaked: 0,
-            stakingTier: StakingTier.BRONZE,
-            totalreviewsgiven: 0,
-            totalreviewsreceived: 0,
-            totalsubmissions: 0,
-            averagereviewscore: 0,
-            joineddate: new Date().toISOString(), 
-          }, { onConflict: 'id' })
-          .single();
-
-        if (upsertError) {
-          console.error("Error upserting user profile:", upsertError.message, upsertError.details);
-          setUserProfile(null);
-          setProfileLoading(false);
-          return;
-        }
-
-
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single();
-
-        if (error) {
-          console.error("Error fetching user profile after upsert:", error.message, error.details);
-          setUserProfile(null);
-        } else if (data) {
-          setUserProfile({
-            ...data,
-            joinedDate: data.joinedDate ? new Date(data.joinedDate) : new Date(), // Convert string to Date object, handle potential null/undefined
-          });
-        }
-      }
+      // Mock profile fetch
+      setUserProfile({
+        id: '00000000-0000-0000-0000-000000000000',
+        username: 'Guest User',
+        avatar_url: '/placeholder-user.jpg',
+        email: 'guest@example.com',
+        reputation: 1500,
+        level: 'Expert',
+        creditsavailable: 1000,
+        creditsstaked: 500,
+        stakingTier: StakingTier.GOLD,
+        totalReviewsGiven: 45,
+        totalReviewsReceived: 28,
+        totalSubmissions: 12,
+        averageReviewScore: 92,
+        joinedDate: new Date(),
+      });
       setProfileLoading(false)
     }
 
@@ -106,7 +76,7 @@ export default function Profile() {
   if (authLoading || profileLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-white">Loading profile...</p>
+        <p className="text-black">Loading profile...</p>
       </div>
     )
   }
@@ -114,7 +84,7 @@ export default function Profile() {
   if (!userProfile) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-white">No profile found. Please sign in.</p>
+        <p className="text-black">No profile found.</p>
       </div>
     )
   }

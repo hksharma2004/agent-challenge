@@ -53,6 +53,7 @@ export default function AnalyzePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [combinedResult, setCombinedResult] = useState<CombinedAnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [streamingEvents, setStreamingEvents] = useState<any[]>([]);
 
   const sectionVariants = {
     hidden: { opacity: 0, y: 20, filter: 'blur(10px)' },
@@ -64,6 +65,7 @@ export default function AnalyzePage() {
     setIsLoading(true);
     setError(null);
     setCombinedResult(null);
+    setStreamingEvents([]);
 
     try {
       const response = await fetch('/api/analyze', {
@@ -72,13 +74,99 @@ export default function AnalyzePage() {
         body: JSON.stringify({ repoUrl, githubPat }),
       });
 
+      const contentType = response.headers.get('content-type');
+      const isJson = contentType && contentType.includes('application/json');
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        if (isJson) {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } else {
+          const text = await response.text();
+          console.error('Non-JSON error response:', text);
+          errorMessage = text.substring(0, 100) || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
 
-      const result: CombinedAnalysisResult = await response.json();
-      setCombinedResult(result);
+      if (!response.body) {
+        throw new Error('Response body is null');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedResult: any = { analysis: {}, reader: {} };
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        if (buffer.trim().startsWith('<!DOCTYPE') || buffer.trim().startsWith('<html')) {
+          console.error('Received HTML instead of JSON:', buffer);
+          throw new Error('Server returned HTML error page instead of JSON stream. Check the server logs.');
+        }
+
+        let startIdx = 0;
+
+        while (startIdx < buffer.length) {
+          const openBraceIdx = buffer.indexOf('{', startIdx);
+          if (openBraceIdx === -1) {
+            buffer = "";
+            break;
+          }
+
+          // Find matching closing brace
+          let depth = 0;
+          let closeBraceIdx = -1;
+          for (let i = openBraceIdx; i < buffer.length; i++) {
+            if (buffer[i] === '{') depth++;
+            else if (buffer[i] === '}') {
+              depth--;
+              if (depth === 0) {
+                closeBraceIdx = i;
+                break;
+              }
+            }
+          }
+
+          if (closeBraceIdx === -1) {
+            // Incomplete JSON — wait for more chunks
+            buffer = buffer.substring(openBraceIdx);
+            break;
+          }
+
+          try {
+            const jsonStr = buffer.substring(openBraceIdx, closeBraceIdx + 1);
+            const event = JSON.parse(jsonStr);
+            setStreamingEvents(prev => [...prev, event]);
+
+            if (event.type === 'workflow-result') {
+              if (event.source === 'analysis') {
+                accumulatedResult.analysis = event.payload;
+              } else if (event.source === 'reader') {
+                accumulatedResult.reader = event.payload;
+              }
+            }
+
+            startIdx = closeBraceIdx + 1;
+          } catch (e) {
+            // Skip past this opening brace and try the next one
+            console.error("Malformed JSON object, skipping");
+            startIdx = openBraceIdx + 1;
+          }
+        }
+
+        // Clear fully processed buffer
+        if (startIdx > 0 && startIdx <= buffer.length) {
+          buffer = buffer.substring(startIdx);
+        }
+      }
+
+      setCombinedResult(accumulatedResult as CombinedAnalysisResult);
 
     } catch (err: any) {
       setError(err.message);
@@ -86,7 +174,7 @@ export default function AnalyzePage() {
       setIsLoading(false);
     }
   };
-
+  
   return (
     <div className="min-h-screen bg-background text-foreground">
       <TopNavBar />
@@ -159,16 +247,39 @@ export default function AnalyzePage() {
           </div>
         </motion.section>
 
-        {isLoading && !combinedResult && !error && (
+        {isLoading && !error && (
           <motion.div
-            className="mx-auto max-w-2xl my-20 rounded-xl border border-neutral-200 bg-neutral-50 p-8 text-center shadow-sm"
+            className="mx-auto max-w-2xl my-20 rounded-xl border border-neutral-200 bg-neutral-50 p-8 shadow-sm"
             variants={sectionVariants}
             initial="hidden"
             animate="visible"
             transition={{ delay: 0.3 }}
           >
-            <Loader2 className="h-10 w-10 text-green-500 animate-spin mx-auto mb-4" aria-hidden="true" />
-            <p className="text-xl text-neutral-600">Analysis in progress, please wait...</p>
+            <div className="flex items-center gap-3 mb-6">
+              <Loader2 className="h-6 w-6 text-green-500 animate-spin" aria-hidden="true" />
+              <p className="text-xl font-semibold text-neutral-800">Analysis in progress...</p>
+            </div>
+            
+            <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar text-left">
+              {streamingEvents.map((event, idx) => (
+                <div key={idx} className="flex items-start gap-3 p-3 rounded-lg bg-white border border-neutral-100 animate-in fade-in slide-in-from-left-2 duration-300">
+                  <div className="mt-1 h-2 w-2 rounded-full bg-green-400 shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-neutral-700">
+                      {event.type.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                      {event.payload?.stepName && <span className="text-green-600 ml-2">[{event.payload.stepName}]</span>}
+                    </p>
+                    {event.payload?.status && (
+                      <p className="text-xs text-neutral-500 mt-1 capitalize">Status: {event.payload.status}</p>
+                    )}
+                  </div>
+                  <span className="text-[10px] font-mono text-neutral-400 capitalize">{event.source || 'system'}</span>
+                </div>
+              ))}
+              {streamingEvents.length === 0 && (
+                <p className="text-sm text-neutral-400 italic text-center py-4">Waiting for workflow to initialize...</p>
+              )}
+            </div>
           </motion.div>
         )}
 

@@ -21,14 +21,37 @@ export async function POST(request: Request) {
       );
     }
     
-    const run = await workflow.createRunAsync();
-    const result = await run.start({
-      inputData: {
-        reviewerId,
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          const run = await workflow.createRunAsync();
+          const workflowStream = await run.stream({
+            inputData: {
+              reviewerId,
+            },
+          });
+
+          for await (const event of workflowStream.fullStream) {
+            const chunk = JSON.stringify(event) + '\n';
+            controller.enqueue(encoder.encode(chunk));
+          }
+
+          controller.close();
+        } catch (error: any) {
+          console.error('Streaming error:', error);
+          controller.error(error);
+        }
       },
     });
 
-    return NextResponse.json(result);
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
   } catch (error) {
     console.error("Error running workflow:", error);
     return NextResponse.json(

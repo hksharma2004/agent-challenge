@@ -3,7 +3,6 @@ import pool from '@/lib/db';
 import { z } from 'zod';
 import { getAllSubmissions } from '@/lib/queries/submissions';
 import { SubmissionStatus } from '@/types/enums';
-import { supabase } from '@/lib/supabase';
 
 const SUBMISSION_FEES = {
   standard: 10,
@@ -21,11 +20,7 @@ const submissionSchema = z.object({
 export async function POST(request: Request) {
   const client = await pool.connect();
   try {
-    const userId = request.headers.get('x-user-id');
-
-    if (!userId) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
+    const userId = '00000000-0000-0000-0000-000000000000'; // Hardcoded Guest User ID
 
     const json = await request.json();
     const parsedData = submissionSchema.parse(json);
@@ -35,38 +30,8 @@ export async function POST(request: Request) {
 
     await client.query('BEGIN');
 
-
-    const { data: userProfile, error: profileError } = await supabase
-      .from('profiles')
-      .select('creditsavailable')
-      .eq('id', userId)
-      .single();
-
-    if (profileError || !userProfile) {
-      await client.query('ROLLBACK');
-      console.error('Error fetching user profile:', profileError);
-      throw new Error('User not found or profile error');
-    }
-
-    const userCredits = userProfile.creditsavailable;
-    if (userCredits < fee) {
-      await client.query('ROLLBACK');
-      throw new Error('Insufficient credits');
-    }
-
-
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ creditsavailable: userCredits - fee })
-      .eq('id', userId);
-
-    if (updateError) {
-      await client.query('ROLLBACK');
-      console.error('Error updating user credits:', updateError);
-      throw new Error('Failed to update user credits');
-    }
-
-
+    // Bypass credit check for now as we're removing Supabase auth/profiles logic
+    
     await client.query(
       'INSERT INTO credit_transactions (user_id, amount, type, description) VALUES ($1, $2, $3, $4)',
       [userId, -fee, 'submission', `Submission fee for: ${title}`]

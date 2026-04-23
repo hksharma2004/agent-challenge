@@ -20,60 +20,60 @@ export async function POST(request: Request) {
     const analysisWorkflow = mastra.getWorkflow("repoAnalysisWorkflow");
     const readerWorkflow = mastra.getWorkflow("repoReaderWorkflow");
 
-    if (!analysisWorkflow) {
-      return NextResponse.json({ error: "Repo analysis workflow not found." }, { status: 500 });
-    }
-    if (!readerWorkflow) {
-      return NextResponse.json({ error: "Repo reader workflow not found." }, { status: 500 });
+    if (!analysisWorkflow || !readerWorkflow) {
+      return NextResponse.json({ error: "Workflows not found." }, { status: 500 });
     }
 
-    const analysisRunPromise = analysisWorkflow.createRunAsync().then(run =>
-      run.start({
-        inputData: {
-          repoUrl: repoUrl,
-          githubToken: githubPat,
-        },
-      })
-    );
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          const runAnalysis = await analysisWorkflow.createRunAsync();
+          const runReader = await readerWorkflow.createRunAsync();
 
-    const readerRunPromise = readerWorkflow.createRunAsync().then(run =>
-      run.start({
-        inputData: {
-          repoUrl: repoUrl,
-          githubToken: githubPat,
-        },
-      })
-    );
+          const analysisStream = await runAnalysis.stream({
+            inputData: { repoUrl, githubToken: githubPat },
+          });
 
-    const [analysisResult, readerResult] = await Promise.all([analysisRunPromise, readerRunPromise]);
+          const readerStream = await runReader.stream({
+            inputData: { repoUrl, githubToken: githubPat },
+          });
 
-    if (analysisResult.status === "failed") {
-      return NextResponse.json({ error: `Analysis workflow failed: ${analysisResult.error?.message}` }, { status: 500 });
-    }
-    if (analysisResult.status === "suspended") {
-      return NextResponse.json({ error: `Analysis workflow suspended: ${JSON.stringify(analysisResult.suspendPayload)}` }, { status: 500 });
-    }
-    if (!analysisResult.result.success) {
-      return NextResponse.json({ error: `Analysis workflow failed: ${analysisResult.result.error || 'Unknown error'}` }, { status: 500 });
-    }
+          // Helper to stream events from a workflow stream
+          const streamEvents = async (workflowStream: any, source: string) => {
+            for await (const event of workflowStream.fullStream) {
+              try {
+                const chunk = JSON.stringify({ ...event, source }) + '\n';
+                controller.enqueue(encoder.encode(chunk));
+              } catch (jsonError: any) {
+                console.error(`Error stringifying event from ${source}:`, event, jsonError);
+                // Enqueue an error event in JSON format
+                controller.enqueue(encoder.encode(JSON.stringify({ type: 'error', source, message: 'Failed to stringify event', error: jsonError.message }) + '\n'));
+              }
+            }
+          };
 
-    if (readerResult.status === "failed") {
-      return NextResponse.json({ error: `Reader workflow failed: ${readerResult.error?.message}` }, { status: 500 });
-    }
-    if (readerResult.status === "suspended") {
-      return NextResponse.json({ error: `Reader workflow suspended: ${JSON.stringify(readerResult.suspendPayload)}` }, { status: 500 });
-    }
-    if (!readerResult.result.success) {
-      return NextResponse.json({ error: `Reader workflow failed: ${readerResult.result.error || 'Unknown error'}` }, { status: 500 });
-    }
+          // Run both streams in parallel and wait for them
+          await Promise.all([
+            streamEvents(analysisStream, 'analysis'),
+            streamEvents(readerStream, 'reader')
+          ]);
 
-    const combinedResult = {
-      analysis: analysisResult.result,
-      reader: readerResult.result,
-    };
+          controller.close();
+        } catch (error: any) {
+          console.error('Streaming error:', error);
+          controller.error(error);
+        }
+      },
+    });
 
-    console.log('Combined analysis complete:', combinedResult);
-    return NextResponse.json(combinedResult);
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
 
   } catch (error: any) {
     console.error('Error in analysis route:', error);

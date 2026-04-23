@@ -1,35 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
-import type { User } from "@supabase/supabase-js";
 
 export function useUser() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function getUser() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (session) {
-        setUser(session.user);
+    // Mock user session
+    setUser({
+      id: "00000000-0000-0000-0000-000000000000",
+      email: "guest@example.com",
+      user_metadata: {
+        full_name: "Guest User",
+        avatar_url: "/placeholder-user.jpg"
       }
-      setLoading(false);
-    }
-
-    getUser();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
     });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    setLoading(false);
   }, []);
 
   return { user, loading };

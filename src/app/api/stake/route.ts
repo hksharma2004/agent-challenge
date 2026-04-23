@@ -1,22 +1,8 @@
-// src/app/api/stake/route.ts
-import { createRouteHandlerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
   const { amount } = await req.json();
-  const cookieStore = cookies();
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const userId = session.user.id;
+  const userId = '00000000-0000-0000-0000-000000000000'; // Hardcoded Guest User ID
   const stakeAmount = Number(amount);
 
   if (!stakeAmount || stakeAmount <= 0) {
@@ -24,29 +10,19 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { data, error } = await supabase.rpc('stake_credits', {
-      p_user_id: userId,
-      p_amount: stakeAmount,
-    });
+    // Mock stake response as we're removing Supabase auth/profiles logic
+    const mockData = {
+      user_id: userId,
+      new_available_credits: 1000 - stakeAmount,
+      new_staked_credits: 500 + stakeAmount,
+    };
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    // Skip the socket event fetch to localhost:3001 if the server isn't running or needed
+    // But keep the logic structure if required for frontend
 
-    // Emit the staking update through the internal API
-    await fetch('http://localhost:3001/api/emit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            userId,
-            event: 'staking_update',
-            data: data[0],
-        }),
-    });
-
-
-    return NextResponse.json(data[0]);
+    return NextResponse.json(mockData);
   } catch (err) {
     return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }
+

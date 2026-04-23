@@ -40,6 +40,9 @@ RUN pnpm rebuild
 
 COPY . .
 
+# Increase Node.js heap limit to prevent out-of-memory errors during build
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
 RUN pnpm build
 
 FROM node:lts AS runtime

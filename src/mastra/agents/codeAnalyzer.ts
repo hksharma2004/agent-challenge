@@ -3,16 +3,16 @@ import { z } from "zod";
 import { Agent } from "@mastra/core/agent";
 import { Memory } from "@mastra/memory";
 import { LibSQLStore } from "@mastra/libsql";
-import { createOllama } from "ollama-ai-provider-v2";
+import { createOpenAI } from "@ai-sdk/openai";
 import { repositoryClonerTool } from "../tools/repository";
 import { repositoryReaderTool } from "../tools/repository-reader-tool";
 import { jsonFormatterTool } from "../tools/json-formatter-tool";
 import { codeAnalyzerTool } from "../tools/code-analyzer-tool";
 import { repoAnalysisWorkflow } from "../workflows/repo-analysis-workflow";
 
-
-const ollama = createOllama({
-  baseURL: process.env.NOS_OLLAMA_API_URL || process.env.OLLAMA_API_URL,
+const openai = createOpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_API_URL,
 });
 
 export const AnalysisResult = z.object({
@@ -135,7 +135,7 @@ export const codeAnalyzerAgent = new Agent({
   name: "Code Analyzer Agent",
   description: "An agent that clones and analyzes GitHub repositories.",
   instructions: permanentSystemPrompt + baseInstructions,
-  model: ollama(process.env.NOS_MODEL_NAME_AT_ENDPOINT || process.env.MODEL_NAME_AT_ENDPOINT || "qwen2.5:8b"),
+  model: openai(process.env.MODEL_NAME || "Qwen3.5-27B-AWQ-4bit") as any,
   tools: {
     [repositoryClonerTool.id]: repositoryClonerTool,
     [repositoryReaderTool.id]: repositoryReaderTool,

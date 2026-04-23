@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       const codeAnalyzerAgent = mastra.getAgent("codeAnalyzerAgent"); 
 
 
-      const agentResult = await codeAnalyzerAgent.run(repoUrl);
+      const agentResult = await codeAnalyzerAgent.generate(repoUrl);
 
       const result = agentResult.object;
       

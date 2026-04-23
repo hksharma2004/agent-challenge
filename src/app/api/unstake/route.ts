@@ -1,9 +1,6 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from 'redis';
-import { Database } from '@/types/db';
 import { StakingTier } from '@/types/enums';
 
 const STAKING_TIERS = {
@@ -30,42 +27,17 @@ function getTier(stakedAmount: number): StakingTier {
 }
 
 export async function POST(request: Request) {
-  const supabase = createRouteHandlerClient<Database>({ cookies });
   const redisClient = createClient({ url: process.env.REDIS_URL });
   await redisClient.connect();
 
   try {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session) {
-      return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-    const userId = session.user.id;
+    const userId = '00000000-0000-0000-0000-000000000000'; // Hardcoded Guest User ID
     const json = await request.json();
     const { amount } = unstakeSchema.parse(json);
 
-    const { data, error } = await supabase.rpc('unstake_credits', {
-      p_user_id: userId,
-      p_amount: amount,
-    });
-
-    if (error) {
-      console.error('Error unstaking credits:', error);
-      return new NextResponse(
-        JSON.stringify({ error: 'Failed to unstake credits', details: error.message }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    const { new_available_credits, new_staked_credits } = data[0];
+    // Mock unstake result as we're removing Supabase auth/profiles logic
+    const new_available_credits = 1000 + amount;
+    const new_staked_credits = 500 - amount;
     const new_tier = getTier(new_staked_credits);
 
     const eventPayload = {
@@ -79,7 +51,11 @@ export async function POST(request: Request) {
     };
     await redisClient.publish('socket-events', JSON.stringify(eventPayload));
 
-    return NextResponse.json({ success: true, ...data[0] });
+    return NextResponse.json({ 
+      success: true, 
+      new_available_credits, 
+      new_staked_credits 
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ success: false, error: error.errors }, { status: 400 });
@@ -91,3 +67,4 @@ export async function POST(request: Request) {
     await redisClient.quit();
   }
 }
+

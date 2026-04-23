@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { supabase } from '@/lib/supabase';
 import { Server } from 'socket.io'; // Assuming Socket.io server instance is available
 
 export async function GET(request: Request) {
@@ -34,11 +33,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const client = await pool.connect();
   try {
-    const userId = request.headers.get('x-user-id'); // Assuming userId is passed in headers
-
-    if (!userId) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
+    const userId = '00000000-0000-0000-0000-000000000000'; // Hardcoded Guest User ID
 
     const json = await request.json();
     const { submission_id, score, rating, feedback, categories } = json;
@@ -56,35 +51,13 @@ export async function POST(request: Request) {
 
     const review = reviewResult.rows[0];
 
-
+    // Bypass credit reward logic as we're removing Supabase auth/profiles logic
     const reviewCreditReward = 5; 
 
-    const { data: reviewerProfile, error: fetchProfileError } = await supabase
-      .from('profiles')
-      .select('creditsavailable')
-      .eq('id', userId)
-      .single();
-
-    if (fetchProfileError || !reviewerProfile) {
-      console.error('Error fetching reviewer profile for credit award:', fetchProfileError);
-      // Continue without awarding credits if profile not found, or handle as an error
-    } else {
-      const { error: updateCreditsError } = await supabase
-        .from('profiles')
-        .update({ creditsavailable: reviewerProfile.creditsavailable + reviewCreditReward })
-        .eq('id', userId);
-
-      if (updateCreditsError) {
-        console.error('Error updating reviewer credits:', updateCreditsError);
-      } else {
-
-        await client.query(
-          'INSERT INTO credit_transactions (user_id, amount, type, description) VALUES ($1, $2, $3, $4)',
-          [userId, reviewCreditReward, 'review_reward', `Review reward for submission: ${submission_id}`]
-        );
-      }
-    }
-
+    await client.query(
+      'INSERT INTO credit_transactions (user_id, amount, type, description) VALUES ($1, $2, $3, $4)',
+      [userId, reviewCreditReward, 'review_reward', `Review reward for submission: ${submission_id}`]
+    );
 
     const { rows: [submission] } = await client.query(
       'SELECT user_id FROM submissions WHERE id = $1',
@@ -92,7 +65,6 @@ export async function POST(request: Request) {
     );
 
     if (submission) {
-    
       console.log(`Simulating Socket.io event for user ${submission.user_id}: New review for submission ${submission_id}`);
     }
 

@@ -3,7 +3,13 @@ import { z } from 'zod';
 import { repositoryClonerTool } from '../tools/repository';
 import { repositoryReaderTool } from '../tools/repository-reader-tool';
 import { jsonFormatterTool } from '../tools/json-formatter-tool';
-import { codeAnalyzerTool } from '../tools/code-analyzer-tool';
+import {
+  securityAuditAgent,
+  performanceAgent,
+  testCoverageAgent,
+  docsAgent,
+  architectureAgent
+} from '../agents/specialists';
 
 export const repoAnalysisWorkflow = createWorkflow({
   id: 'repo-analysis-workflow',
@@ -96,15 +102,45 @@ export const repoAnalysisWorkflow = createWorkflow({
       success: z.boolean(),
       error: z.string().optional(),
     }),
-    execute: async ({ inputData, runtimeContext }) => {
-      const result = await codeAnalyzerTool.execute({
-        context: { repoResponse: JSON.stringify(inputData) },
-        runtimeContext,
-      });
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to analyze code');
+    execute: async ({ inputData }) => {
+      const { files } = inputData;
+
+      // Construct a summary prompt from the repository files
+      const repoContext = files
+        .map((f: any) => `File: ${f.path}\nContent:\n${f.content.substring(0, 1000)}\n---`)
+        .join('\n\n');
+
+      const createPrompt = (specialty: string) => 
+        `Analyze the following repository files for ${specialty} and provide a concise summary of your findings:\n\n${repoContext}`;
+
+      try {
+        const [securityRes, performanceRes, testingRes, docsRes, architectureRes] = await Promise.all([
+          securityAuditAgent.generate(createPrompt('security vulnerabilities')),
+          performanceAgent.generate(createPrompt('performance bottlenecks')),
+          testCoverageAgent.generate(createPrompt('test coverage and testing practices')),
+          docsAgent.generate(createPrompt('documentation quality and gaps')),
+          architectureAgent.generate(createPrompt('architectural patterns and code structure')),
+        ]);
+
+        const codeQualitySummary = `Performance: ${performanceRes.text}\n\nArchitecture: ${architectureRes.text}`;
+
+        return {
+          codeQuality: codeQualitySummary,
+          documentation: docsRes.text,
+          testing: testingRes.text,
+          security: securityRes.text,
+          success: true,
+        };
+      } catch (error: any) {
+        return {
+          codeQuality: '',
+          documentation: '',
+          testing: '',
+          security: '',
+          success: false,
+          error: `Agent analysis failed: ${error.message}`,
+        };
       }
-      return result;
     },
   })
 )
