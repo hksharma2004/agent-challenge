@@ -14,9 +14,6 @@ const nextConfig = {
       },
     ],
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   serverExternalPackages: [
     '@mastra/core',
     '@mastra/libsql',
@@ -73,6 +70,7 @@ const nextConfig = {
 
     return config;
   },
+  turbopack: {},
 };
 
 export default nextConfig;
