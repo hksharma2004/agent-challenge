@@ -194,7 +194,7 @@ export function LandingNavBar() {
                           <summary className="flex items-center justify-between py-2 text-lg font-medium text-neutral-800 cursor-pointer hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-neon-green focus-visible:ring-offset-2">
                             {item.name}
                             <span className="ml-2 transition-transform duration-200 group-open:rotate-90">
-                              >
+                              &gt;
                             </span>
                           </summary>
                           <div className="pl-4 mt-2 flex flex-col gap-2">
