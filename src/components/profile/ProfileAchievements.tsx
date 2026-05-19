@@ -1,4 +1,4 @@
-import { Trophy, Gem, TrendingUp, Star } from "lucide-react";
+import { Trophy, Code2, TrendingUp, Star } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { UserProfile } from '@/types/schema';
 import { motion } from "framer-motion";
@@ -34,10 +34,10 @@ export function ProfileAchievements({ user }: ProfileAchievementsProps) {
     },
     {
       id: 3,
-      name: "Credit Hoarder",
-      description: `Accumulated ${user.creditsavailable + user.creditsstaked} DCC`,
-      icon: Gem,
-      unlocked: (user.creditsavailable + user.creditsstaked) >= 100, 
+      name: "Consistent Builder",
+      description: `Submitted ${user.totalSubmissions} repositories`,
+      icon: Code2,
+      unlocked: user.totalSubmissions >= 5, 
     },
     {
       id: 4,

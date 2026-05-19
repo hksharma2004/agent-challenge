@@ -14,7 +14,6 @@ A decentralized code review platform combining AI-powered analysis with human ex
 
 **The Solution**: 
 - **Agents + Human Reviews**: Automated analysis with expert human feedback
-- **Credit & Staking System**: Fair rewards for quality reviewers (Bronze/Silver/Gold tiers)
 - **Decentralized**: Runs on Nosana's GPU network—no bottlenecks
 
 ---
@@ -22,7 +21,7 @@ A decentralized code review platform combining AI-powered analysis with human ex
 ## 🛠️ Tech Stack
 
 **Frontend**: Next.js 15, React 19, Tailwind CSS, Radix UI  
-**Backend**: PostgreSQL, Supabase Auth, Socket.io  
+**Backend**: PostgreSQL  
 **AI**: Mastra Core (v0.22.2), Ollama (Qwen 3:8b), MCP  
 **Infrastructure**: Nosana GPU network (6GB VRAM)
 
@@ -48,7 +47,7 @@ A decentralized code review platform combining AI-powered analysis with human ex
 ## 💡 Key Benefits
 
 **For Developers**: Instant AI analysis + expert human feedback, multi-language support  
-**For Reviewers**: Earn credits, build reputation, stake for priority access  
+**For Reviewers**: Build reputation through high-quality review contributions  
 **For Everyone**: Decentralized, scalable, transparent—no single point of failure
 
 ---

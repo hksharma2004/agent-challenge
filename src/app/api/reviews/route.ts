@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { Server } from 'socket.io'; // Assuming Socket.io server instance is available
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -50,23 +49,6 @@ export async function POST(request: Request) {
     );
 
     const review = reviewResult.rows[0];
-
-    // Bypass credit reward logic as we're removing Supabase auth/profiles logic
-    const reviewCreditReward = 5; 
-
-    await client.query(
-      'INSERT INTO credit_transactions (user_id, amount, type, description) VALUES ($1, $2, $3, $4)',
-      [userId, reviewCreditReward, 'review_reward', `Review reward for submission: ${submission_id}`]
-    );
-
-    const { rows: [submission] } = await client.query(
-      'SELECT user_id FROM submissions WHERE id = $1',
-      [submission_id]
-    );
-
-    if (submission) {
-      console.log(`Simulating Socket.io event for user ${submission.user_id}: New review for submission ${submission_id}`);
-    }
 
     return NextResponse.json({ success: true, review }, { status: 201 });
   } catch (error) {

@@ -11,7 +11,7 @@ interface ParticleBurstProps {
   text?: string
 }
 
-export function ParticleBurst({ trigger, count = 10, text = "+15 DCC" }: ParticleBurstProps) {
+export function ParticleBurst({ trigger, count = 10, text = "+15" }: ParticleBurstProps) {
   const [particles, setParticles] = useState<any[]>([])
 
   useEffect(() => {

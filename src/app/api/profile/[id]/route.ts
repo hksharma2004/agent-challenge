@@ -6,7 +6,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
   const client = await pool.connect();
   try {
     const { rows } = await client.query(
-      `SELECT id, username, avatar_url, email, reputation, level, creditsavailable, creditsstaked, stakingtier, totalreviewsgiven, totalreviewsreceived, totalsubmissions, averagereviewscore, joineddate
+      `SELECT id, username, avatar_url, email, reputation, level, totalreviewsgiven, totalreviewsreceived, totalsubmissions, averagereviewscore, joineddate
        FROM user_profiles
        WHERE id = $1`,
       [id]

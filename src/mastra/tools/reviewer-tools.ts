@@ -93,27 +93,3 @@ export const getReviewerAvailabilityTool = createTool({
     return { is_available: rows[0].is_available };
   },
 });
-
-export const getReviewerStakedCreditsTool = createTool({
-  id: 'get-reviewer-staked-credits',
-  description: 'Retrieves the staked credits for a given reviewer ID.',
-  inputSchema: z.object({
-    reviewerId: z.string().uuid().describe('The ID of the reviewer'),
-  }),
-  outputSchema: z.object({
-    staked_credits: z.number().describe('The staked credits of the reviewer'),
-  }),
-  execute: async ({ context }) => {
-    const { reviewerId } = context;
-    const { rows } = await pool.query(
-      'SELECT staked_credits FROM users WHERE id = $1',
-      [reviewerId]
-    );
-
-    if (rows.length === 0) {
-      throw new Error(`Reviewer with ID ${reviewerId} not found.`);
-    }
-    return { staked_credits: rows[0].staked_credits };
-  },
-});
-

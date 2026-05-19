@@ -27,14 +27,13 @@ export function ReviewsList({ reviews }: ReviewsListProps) {
                 <TableHead>Submission</TableHead>
                 <TableHead>Score</TableHead>
                 <TableHead>Date</TableHead>
-                <TableHead>Credits Earned</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {reviews.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                     No reviews yet
                   </TableCell>
                 </TableRow>
@@ -61,9 +60,6 @@ export function ReviewsList({ reviews }: ReviewsListProps) {
                     </TableCell>
                     <TableCell className="body-sm text-muted-foreground">
                       {formatDate(review.submittedDate)}
-                    </TableCell>
-                    <TableCell className="text-success font-medium">
-                      +{review.creditsEarned} DCC
                     </TableCell>
                     <TableCell>
                       <Badge variant="secondary">Completed</Badge>

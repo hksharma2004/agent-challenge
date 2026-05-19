@@ -3,11 +3,9 @@
 import {
   Zap,
   Trophy,
-  Gem,
   ArrowRight,
   Code2,
   Star,
-  CreditCard,
 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -34,9 +32,9 @@ export function DashboardClient({ displayUser }: DashboardClientProps) {
           animate="visible"
           transition={{ delay: 0.1 }}
         >
-          <Gem className="w-8 h-8 text-green-500 mb-3" />
-          <p className="text-neutral-600 text-sm mb-1">DCC Balance</p>
-          <p className="text-4xl font-semibold text-black">{displayUser.creditsavailable}</p>
+          <Zap className="w-8 h-8 text-green-500 mb-3" />
+          <p className="text-neutral-600 text-sm mb-1">Submissions</p>
+          <p className="text-4xl font-semibold text-black">{displayUser.totalSubmissions}</p>
         </motion.div>
 
         <motion.div
@@ -45,18 +43,6 @@ export function DashboardClient({ displayUser }: DashboardClientProps) {
           initial="hidden"
           animate="visible"
           transition={{ delay: 0.2 }}
-        >
-          <Zap className="w-8 h-8 text-green-500 mb-3" />
-          <p className="text-neutral-600 text-sm mb-1">Staked</p>
-          <p className="text-4xl font-semibold text-black">{displayUser.creditsstaked}</p>
-        </motion.div>
-
-        <motion.div
-          className="bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border border-neutral-200 flex flex-col justify-center items-center text-center"
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          transition={{ delay: 0.3 }}
         >
           <Trophy className="w-8 h-8 text-green-500 mb-3" />
           <p className="text-neutral-600 text-sm mb-1">Reputation</p>
@@ -143,7 +129,7 @@ export function DashboardClient({ displayUser }: DashboardClientProps) {
           >
             <div>
               <h3 className="font-semibold text-xl text-black mb-2">Start Reviewing</h3>
-              <p className="text-neutral-600 text-sm">Earn credits by reviewing code.</p>
+              <p className="text-neutral-600 text-sm">Review submissions and improve code quality.</p>
             </div>
             <div className="mt-6 flex items-center justify-between">
               <Star className="w-7 h-7 text-green-500" />
@@ -152,26 +138,6 @@ export function DashboardClient({ displayUser }: DashboardClientProps) {
           </Link>
         </motion.div>
 
-        <motion.div
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          transition={{ delay: 0.8 }}
-        >
-          <Link
-            href="/credits"
-            className="relative flex flex-col justify-between h-full bg-white rounded-2xl p-8 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border border-neutral-200 group"
-          >
-            <div>
-              <h3 className="font-semibold text-xl text-black mb-2">Manage Credits</h3>
-              <p className="text-neutral-600 text-sm">Stake or purchase DCC credits.</p>
-            </div>
-            <div className="mt-6 flex items-center justify-between">
-              <CreditCard className="w-7 h-7 text-green-500" />
-              <ArrowRight className="w-6 h-6 text-neutral-400 group-hover:text-green-500 group-hover:translate-x-1 transition-transform duration-200" />
-            </div>
-          </Link>
-        </motion.div>
       </div>
     </div>
   );

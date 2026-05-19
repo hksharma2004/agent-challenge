@@ -13,9 +13,15 @@ import { Badge } from "@/components/ui/badge";
 import { TrendingUp } from "lucide-react"; // Changed to TrendingUp
 import { useRef, useState } from "react";
 import { useSpring, useMotionValueEvent } from "framer-motion";
-import { mockRootProps } from "@/data/decentracodeMockData"; // Import mockRootProps
 
-const chartData = mockRootProps.codeQualityData; // Use codeQualityData
+const chartData = [
+  { month: "January", score: 72 },
+  { month: "February", score: 76 },
+  { month: "March", score: 80 },
+  { month: "April", score: 83 },
+  { month: "May", score: 87 },
+  { month: "June", score: 91 },
+];
 
 const chartConfig = {
   score: { // Changed to score

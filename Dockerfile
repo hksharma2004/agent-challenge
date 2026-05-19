@@ -62,4 +62,4 @@ USER appuser
 EXPOSE 3000
 EXPOSE 4111
 
-ENTRYPOINT ["npm", "start"]
+CMD ["npm", "start"]

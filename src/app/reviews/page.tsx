@@ -11,7 +11,6 @@ export interface ReviewerData {
   reputation: number;
   languages: string[];
   availability: string;
-  stakedCredits: number;
 }
 
 export default function ReviewsPage() {

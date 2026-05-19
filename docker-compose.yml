@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   web:
     build:
@@ -7,17 +5,30 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-      - "4111:4111"
     environment:
       - DATABASE_URL=postgres://dev:devpass@postgres:5432/decentracode
-      - REDIS_URL=redis://redis:6379
     env_file:
       - .env
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_started
+    restart: unless-stopped
+
+  agents:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["npm", "run", "dev:agents"]
+    ports:
+      - "4111:4111"
+    environment:
+      - DATABASE_URL=postgres://dev:devpass@postgres:5432/decentracode
+      - MASTRA_TELEMETRY_DISABLED=1
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
   postgres:
@@ -35,12 +46,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
-
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
     restart: unless-stopped
 
 volumes:

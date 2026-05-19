@@ -1,8 +1,6 @@
 import { 
   ReviewStatus, 
   SubmissionStatus, 
-  StakingTier, 
-  TransactionType, 
   ActivityType,
   ProgrammingLanguage,
   CategoryType 
@@ -28,34 +26,12 @@ export const formatSubmissionStatus = (status: SubmissionStatus): string => {
   return statusMap[status];
 };
 
-export const formatStakingTier = (tier: StakingTier): string => {
-  const tierMap: Record<StakingTier, string> = {
-    [StakingTier.BRONZE]: "Bronze",
-    [StakingTier.SILVER]: "Silver",
-    [StakingTier.GOLD]: "Gold"
-  };
-  return tierMap[tier];
-};
-
-export const formatTransactionType = (type: TransactionType): string => {
-  const typeMap: Record<TransactionType, string> = {
-    [TransactionType.EARNED]: "Earned",
-    [TransactionType.SPENT]: "Spent",
-    [TransactionType.STAKED]: "Staked",
-    [TransactionType.UNSTAKED]: "Unstaked"
-  };
-  return typeMap[type];
-};
-
 export const formatActivityType = (type: ActivityType): string => {
   const activityMap: Record<ActivityType, string> = {
     [ActivityType.CODE_SUBMITTED]: "Code Submitted",
     [ActivityType.REVIEW_RECEIVED]: "Review Received",
     [ActivityType.REVIEW_GIVEN]: "Review Given",
-    [ActivityType.CREDITS_EARNED]: "Credits Earned",
-    [ActivityType.CREDITS_SPENT]: "Credits Spent",
     [ActivityType.ANALYSIS_COMPLETE]: "Analysis Complete",
-    [ActivityType.STAKING_UPDATED]: "Staking Updated"
   };
   return activityMap[type];
 };
@@ -104,10 +80,6 @@ export const formatDateTime = (date: Date): string => {
     hour: '2-digit',
     minute: '2-digit'
   }).format(date);
-};
-
-export const formatCredits = (amount: number): string => {
-  return `${amount.toLocaleString()} DCC`;
 };
 
 export const formatScore = (score: number): string => {

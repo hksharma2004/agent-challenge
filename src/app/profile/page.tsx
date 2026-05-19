@@ -9,9 +9,7 @@ import { ProfileRecentReviews } from "@/components/profile/ProfileRecentReviews"
 import { ProfileRecentSubmissions } from "@/components/profile/ProfileRecentSubmissions"
 import { ProfileScoreStatistics } from "@/components/profile/ProfileScoreStatistics"
 import { ProfileAchievements } from "@/components/profile/ProfileAchievements"
-import { ProfileTierInfo } from "@/components/profile/ProfileTierInfo"
 import { UserProfile } from "@/types/schema"
-import { StakingTier } from "@/types/enums"
 import { useUser } from "@/hooks/use-user";
 
 export default function Profile() {
@@ -29,9 +27,6 @@ export default function Profile() {
         email: 'guest@example.com',
         reputation: 1500,
         level: 'Expert',
-        creditsavailable: 1000,
-        creditsstaked: 500,
-        stakingTier: StakingTier.GOLD,
         totalReviewsGiven: 45,
         totalReviewsReceived: 28,
         totalSubmissions: 12,
@@ -101,8 +96,6 @@ export default function Profile() {
           reviewsGivenCount={userProfile.totalReviewsGiven}
           reviewsReceivedCount={userProfile.totalReviewsReceived}
           reputationScore={userProfile.reputation}
-          creditsAvailable={userProfile.creditsavailable}
-          creditsStaked={userProfile.creditsstaked}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -120,7 +113,6 @@ export default function Profile() {
               reviewAccuracy={userProfile.averageReviewScore} 
             />
             <ProfileAchievements user={userProfile} />
-            <ProfileTierInfo user={userProfile} />
           </div>
         </div>
       </div>

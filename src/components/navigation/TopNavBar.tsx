@@ -75,17 +75,6 @@ export function TopNavBar() {
               )}
             </Link>
             <Link
-              href="/credits"
-              className={`relative font-medium text-neutral-600 hover:text-black transition-all duration-200 ease-out hover:translate-y-[-1px] ${
-                pathname === "/credits" ? "text-black" : ""
-              }`}
-            >
-              Credits
-              {pathname === "/credits" && (
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-green-500 rounded-full" />
-              )}
-            </Link>
-            <Link
               href="/submissions"
               className={`relative font-medium text-neutral-600 hover:text-black transition-all duration-200 ease-out hover:translate-y-[-1px] ${
                 pathname === "/submissions" ? "text-black" : ""
@@ -183,18 +172,6 @@ export function TopNavBar() {
                 >
                   Reviews
                   {pathname === "/reviews" && (
-                    <span className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-1 bg-green-500 rounded-full" />
-                  )}
-                </Link>
-                <Link
-                  href="/credits"
-                  className={`relative font-medium text-neutral-600 hover:text-black transition-colors ${
-                    pathname === "/credits" ? "text-black" : ""
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Credits
-                  {pathname === "/credits" && (
                     <span className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-1 bg-green-500 rounded-full" />
                   )}
                 </Link>

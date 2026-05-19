@@ -14,7 +14,7 @@ const decentracodeFont = localFont({
 
 export const metadata: Metadata = {
   title: "DecentraCode - Code Review Platform",
-  description: "AI-powered code review and credit-based economy",
+  description: "AI-powered code review with human reviewer matching",
   generator: "v0.app",
 }
 

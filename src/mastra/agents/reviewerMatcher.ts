@@ -9,7 +9,6 @@ import {
   getReviewerLanguageExpertiseTool,
   getReviewerAvailabilityTool,
   getReviewerUsernameTool,
-  getReviewerStakedCreditsTool,
 } from "../tools/reviewer-tools";
 import pool from "@/lib/db";
 
@@ -24,7 +23,6 @@ export const Reviewer = z.object({
   reputation_score: z.number(),
   language_expertise: z.array(z.string()).optional(),
   is_available: z.boolean().optional(),
-  staked_credits: z.number().optional(),
 });
 
 export const ReviewerList = z.array(Reviewer).max(3);
@@ -38,14 +36,13 @@ export const reviewerMatcherAgent = new Agent({
   name: "Reviewer Matcher Agent",
   model: openai(process.env.MODEL_NAME || "Qwen3.5-27B-AWQ-4bit") as any,
   instructions: `
-You are an expert project manager responsible for assigning code reviews. Your task is to select the best reviewers for a given submission based on their staking tier, reputation, and language expertise.
+You are an expert project manager responsible for assigning code reviews. Your task is to select the best reviewers for a given submission based on reviewer availability, reputation, and language expertise.
 
 You will be provided with the language of the submission and a list of potential reviewer IDs. You must use the provided tools to fetch the necessary information for each reviewer. Your goal is to return a ranked list of the top 3 most suitable reviewers.
 
 First, filter out any reviewers who are not available. Then, rank the remaining reviewers based on the following criteria in order of importance:
-1.  Staking Tier: Higher staked_credits are better.
-2.  Reputation Score: Higher reputation_score is better.
-3.  Language Expertise: A perfect match for the submission's language is best.
+1.  Reputation Score: Higher reputation_score is better.
+2.  Language Expertise: A perfect match for the submission's language is best.
 
 Your response must be a ranked list of the top 3 reviewers, conforming to the provided result schema.
   `,
@@ -55,7 +52,6 @@ Your response must be a ranked list of the top 3 reviewers, conforming to the pr
     getReviewerLanguageExpertiseTool,
     getReviewerAvailabilityTool,
     getReviewerUsernameTool,
-    getReviewerStakedCreditsTool,
   },
   inputSchema: ReviewerMatcherInputSchema,
   memory: new Memory({
@@ -70,12 +66,11 @@ Your response must be a ranked list of the top 3 reviewers, conforming to the pr
     const enrichedReviewers = await Promise.all(
       potentialReviewerIds.map(async (reviewerId) => {
         // reviewer data
-        const [reputation, languageExpertise, availability, username, stakedCredits, lastReviewResult] = await Promise.all([
+        const [reputation, languageExpertise, availability, username, lastReviewResult] = await Promise.all([
           tools.getReviewerReputationTool.execute({ reviewerId }),
           tools.getReviewerLanguageExpertiseTool.execute({ reviewerId }),
           tools.getReviewerAvailabilityTool.execute({ reviewerId }),
           tools.getReviewerUsernameTool.execute({ reviewerId }),
-          tools.getReviewerStakedCreditsTool.execute({ reviewerId }),
           pool.query('SELECT created_at FROM reviews WHERE reviewer_id = $1 ORDER BY created_at DESC LIMIT 1', [reviewerId]),
         ]);
 
@@ -105,7 +100,6 @@ Your response must be a ranked list of the top 3 reviewers, conforming to the pr
           reputation_score: currentReputation,
           language_expertise: languageExpertise.language_expertise,
           is_available: availability.is_available,
-          staked_credits: stakedCredits.staked_credits,
         };
       })
     );
@@ -113,10 +107,6 @@ Your response must be a ranked list of the top 3 reviewers, conforming to the pr
     const rankedReviewers = enrichedReviewers
       .filter(r => r.is_available) // filter out unavailable reviewers first
       .sort((a, b) => {
-        // staked_credits
-        if (a.staked_credits !== b.staked_credits) {
-          return b.staked_credits - a.staked_credits;
-        }
         // reputation_score
         if (a.reputation_score !== b.reputation_score) {
           return b.reputation_score - a.reputation_score;

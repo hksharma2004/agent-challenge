@@ -66,7 +66,7 @@ const mockSubmissions: CodeSubmission[] = [
   {
     id: 'sub4',
     title: 'Real-time Chat Application',
-    description: 'A real-time chat application with WebSockets and React.',
+    description: 'A chat-style collaboration app built with React.',
     language: ProgrammingLanguage.JAVASCRIPT,
     authorId: 'user3',
     author: { name: 'Aditya Rao', avatarUrl: '/placeholder-user.jpg' },
@@ -76,7 +76,7 @@ const mockSubmissions: CodeSubmission[] = [
     commentsCount: 1,
     reviewsCount: 0,
     repoUrl: 'https://github.com/example/repo4',
-    tags: ['chat', 'websocket', 'react'], 
+    tags: ['chat', 'react'], 
   },
   {
     id: 'sub5',

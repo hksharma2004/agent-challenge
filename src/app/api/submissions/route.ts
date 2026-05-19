@@ -4,17 +4,12 @@ import { z } from 'zod';
 import { getAllSubmissions } from '@/lib/queries/submissions';
 import { SubmissionStatus } from '@/types/enums';
 
-const SUBMISSION_FEES = {
-  standard: 10,
-  high: 50,
-};
-
 const submissionSchema = z.object({
   repoUrl: z.string().url(),
   title: z.string().min(1),
   description: z.string().optional(),
   language: z.string(),
-  priority: z.enum(['standard', 'high']),
+  priority: z.enum(['standard', 'high']).optional(),
 });
 
 export async function POST(request: Request) {
@@ -24,18 +19,9 @@ export async function POST(request: Request) {
 
     const json = await request.json();
     const parsedData = submissionSchema.parse(json);
-    const { repoUrl, title, description, language, priority } = parsedData;
-
-    const fee = SUBMISSION_FEES[priority];
+    const { repoUrl, title, description, language } = parsedData;
 
     await client.query('BEGIN');
-
-    // Bypass credit check for now as we're removing Supabase auth/profiles logic
-    
-    await client.query(
-      'INSERT INTO credit_transactions (user_id, amount, type, description) VALUES ($1, $2, $3, $4)',
-      [userId, -fee, 'submission', `Submission fee for: ${title}`]
-    );
 
     // Insert submission
     const submissionResult = await client.query(

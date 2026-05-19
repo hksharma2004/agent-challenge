@@ -61,7 +61,6 @@ export function ProfileRecentReviews({ recentReviews }: ProfileRecentReviewsProp
                 <p className="text-sm text-gray-500 mt-1 line-clamp-1">{review.feedback}</p>
               </div>
               <div className="text-right flex flex-col items-end">
-                <p className="text-neon-green font-semibold text-base">+{review.earned} DCC</p>
                 <p className="text-xs text-gray-400 mt-1">{review.time}</p>
               </div>
             </motion.div>

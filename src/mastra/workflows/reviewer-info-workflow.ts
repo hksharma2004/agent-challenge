@@ -5,7 +5,6 @@ import {
   getReviewerLanguageExpertiseTool,
   getReviewerAvailabilityTool,
   getReviewerUsernameTool,
-  getReviewerStakedCreditsTool,
 } from '../tools/reviewer-tools';
 
 export const reviewerInfoWorkflow = createWorkflow({
@@ -18,7 +17,6 @@ export const reviewerInfoWorkflow = createWorkflow({
     reputation: z.number().optional().describe('The reputation score of the reviewer.'),
     languages: z.array(z.string()).optional().describe('The language expertise of the reviewer.'),
     availability: z.string().optional().describe('The availability status of the reviewer.'),
-    stakedCredits: z.number().optional().describe('The staked credits of the reviewer.'),
   }),
 })
 .then(
@@ -150,7 +148,7 @@ export const reviewerInfoWorkflow = createWorkflow({
 )
 .then(
   createStep({
-    id: 'get-staked-credits-step',
+    id: 'format-reviewer-info-step',
     inputSchema: z.object({
       reviewerId: z.string().uuid(),
       reputation: z.number().optional(),
@@ -161,7 +159,6 @@ export const reviewerInfoWorkflow = createWorkflow({
       error: z.string().optional(),
     }),
     outputSchema: z.object({
-      stakedCredits: z.number().optional(),
       reputation: z.number().optional(),
       languages: z.array(z.string()).optional(),
       availability: z.string().optional(),
@@ -175,31 +172,14 @@ export const reviewerInfoWorkflow = createWorkflow({
           reputation: inputData.reputation,
           languages: inputData.languageExpertise,
           availability: inputData.availability ? 'Available' : 'Unavailable',
-          stakedCredits: undefined, 
         };
       }
-      try {
-        const result = await getReviewerStakedCreditsTool.execute({
-          context: { reviewerId: inputData.reviewerId },
-          runtimeContext: {} as any, 
-        });
-        return {
-          username: inputData.username,
-          reputation: inputData.reputation,
-          languages: inputData.languageExpertise,
-          availability: inputData.availability ? 'Available' : 'Unavailable',
-          stakedCredits: result.staked_credits,
-        };
-      } catch (error: any) {
-
-        return {
-          username: inputData.username,
-          reputation: inputData.reputation,
-          languages: inputData.languageExpertise,
-          availability: inputData.availability ? 'Available' : 'Unavailable',
-          stakedCredits: undefined, 
-        };
-      }
+      return {
+        username: inputData.username,
+        reputation: inputData.reputation,
+        languages: inputData.languageExpertise,
+        availability: inputData.availability ? 'Available' : 'Unavailable',
+      };
     },
   })
 )

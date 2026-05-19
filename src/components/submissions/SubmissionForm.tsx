@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -11,9 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { ProgrammingLanguage } from '@/types/enums';
-import { useUser } from '@/hooks/use-user';
-import { UserProfile } from '@/types/schema';
-import { GithubIcon, CodeIcon, GlobeIcon, DollarSignIcon, ArrowLeftIcon } from 'lucide-react';
+import { GithubIcon, CodeIcon, GlobeIcon, ArrowLeftIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 
@@ -22,21 +20,10 @@ const submissionSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
   description: z.string().optional(),
   language: z.nativeEnum(ProgrammingLanguage, { message: "Please select a language" }),
-  priority: z.enum(['standard', 'express', 'premium'], { message: "Please select a priority" }),
 });
 
-const SUBMISSION_FEES = {
-  standard: 10,
-  express: 50,
-  premium: 100,
-};
-
 export default function SubmissionForm() {
-  const { user, loading: userLoading } = useUser();
   const { toast } = useToast();
-  const [submissionCost, setSubmissionCost] = useState(SUBMISSION_FEES.standard);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [profileLoading, setProfileLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const cardVariants = {
@@ -44,36 +31,9 @@ export default function SubmissionForm() {
     visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 1.0 } },
   };
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (user?.id) {
-        const response = await fetch(`/api/profile/${user.id}`);
-        if (!response.ok) {
-          console.error(`Failed to fetch user profile: ${response.status} ${response.statusText}`);
-
-          setProfileLoading(false);
-          return;
-        }
-        try {
-          const data = await response.json();
-          setUserProfile(data);
-        } catch (error) {
-          console.error('Error parsing user profile JSON:', error);
-          // Handle JSON parsing error, e.g., set userProfile to null or a default value
-        }
-      }
-      setProfileLoading(false);
-    };
-
-    if (!userLoading) {
-      fetchUserProfile();
-    }
-  }, [user, userLoading]);
-
   const form = useForm<z.infer<typeof submissionSchema>>({
     resolver: zodResolver(submissionSchema),
     defaultValues: {
-      priority: 'standard',
       repoUrl: '',
       title: '',
       description: '',
@@ -237,38 +197,6 @@ export default function SubmissionForm() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="priority"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center text-gray-700">
-                      <DollarSignIcon className="h-4 w-4 mr-2 text-gray-500" />
-                      Priority
-                    </FormLabel>
-                    <Select onValueChange={(value) => {
-                      field.onChange(value);
-                      setSubmissionCost(SUBMISSION_FEES[value as 'standard' | 'express' | 'premium']);
-                    }} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className={`rounded-xl border ${field.value === 'premium' ? 'border-green-400 ring-2 ring-green-400' : 'border-gray-300'} focus:ring-2 focus:ring-green-400 focus:border-green-400 transition-all duration-200 hover:border-green-300`}>
-                          <SelectValue placeholder="Select a priority level" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="rounded-xl shadow-lg border border-gray-200 bg-white">
-                        <SelectItem value="standard" className="hover:bg-green-50 hover:text-green-700 rounded-lg mx-1 my-0.5">Standard</SelectItem>
-                        <SelectItem value="express" className="hover:bg-green-50 hover:text-green-700 rounded-lg mx-1 my-0.5">Express</SelectItem>
-                        <SelectItem value="premium" className="hover:bg-green-50 hover:text-green-700 rounded-lg mx-1 my-0.5">Premium</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage className="text-red-500 text-sm" />
-                  </FormItem>
-                )}
-              />
-              <div className="text-right text-sm text-gray-600 mt-4">
-                Submission Cost: <span className="text-green-400 font-bold">{submissionCost} credits</span>
-                {userProfile && <p>Your Balance: {userProfile.creditsavailable} credits</p>}
-              </div>
               <Button
                 type="submit"
                 className="w-full py-2 rounded-xl text-white font-bold bg-gradient-to-r from-[#00FF80] to-[#00E676] hover:shadow-[0_0_20px_#00FF80]/50 transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:from-gray-400 disabled:to-gray-500"

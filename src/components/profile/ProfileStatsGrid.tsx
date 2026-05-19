@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
-import { Card, CardContent } from "@/components/ui/card";
-import { cn } from '@/lib/utils';
+import { CardContent } from "@/components/ui/card";
 
 interface StatCardProps {
   title: string;
@@ -31,8 +30,6 @@ interface ProfileStatsGridProps {
   reviewsGivenCount: number;
   reviewsReceivedCount: number;
   reputationScore: number;
-  creditsAvailable: number;
-  creditsStaked: number;
 }
 
 export function ProfileStatsGrid({
@@ -40,8 +37,6 @@ export function ProfileStatsGrid({
   reviewsGivenCount,
   reviewsReceivedCount,
   reputationScore,
-  creditsAvailable,
-  creditsStaked,
 }: ProfileStatsGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -49,8 +44,6 @@ export function ProfileStatsGrid({
       <StatCard title="Reviews Given" value={reviewsGivenCount} delay={0.2} />
       <StatCard title="Reviews Received" value={reviewsReceivedCount} delay={0.3} />
       <StatCard title="Reputation" value={reputationScore} delay={0.4} />
-      <StatCard title="Credits Available" value={creditsAvailable} delay={0.5} />
-      <StatCard title="Credits Staked" value={creditsStaked} delay={0.6} />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { User, Trophy, Code, CheckCircle, Gem, Sparkles } from "lucide-react";
+import { User, Trophy, Code, CheckCircle, Sparkles } from "lucide-react";
 import type { ReviewerData } from "@/app/reviews/page";
 import { useEffect, useState } from "react";
 
@@ -40,11 +40,6 @@ export function ReviewerSummary({ data }: ReviewerSummaryProps) {
       title: "Availability",
       value: data?.availability,
     },
-    {
-      icon: <Gem className="w-5 h-5" />,
-      title: "Staked Credits",
-      value: data?.stakedCredits,
-    },
   ];
 
   if (!data && !isVisible) {
@@ -59,7 +54,7 @@ export function ReviewerSummary({ data }: ReviewerSummaryProps) {
 
   return (
     <div className="mt-8 grid gap-8">
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {summaryData.map((item, index) => (
           <div
             key={index}

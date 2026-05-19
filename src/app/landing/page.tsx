@@ -81,7 +81,7 @@ const LandingPage = () => {
                 Code reviews are often slow, inconsistent, and limited by availability. Developers spend hours waiting for feedback, reviewers juggle context switching, and valuable insights get lost across threads.
               </p>
               <p>
-                DecentraCode fixes that by combining automated AI agents with verified reviewers. You get structured analysis, consistent feedback, and a transparent credit-based system that rewards contributors fairly.
+                DecentraCode fixes that by combining automated AI agents with verified reviewers. You get structured analysis, consistent feedback, and a reputation-driven review process.
               </p>
             </div>
           </Card>
@@ -103,7 +103,7 @@ const LandingPage = () => {
               {[
                 { icon: '📝', title: '1. Submit Your Code', desc: 'Upload your repository or paste snippets. DecentraCode automatically detects your stack.' },
                 { icon: '🤖', title: '2. AI + Human Review', desc: 'Mastra agents perform initial analysis. Verified reviewers refine insights and provide feedback.' },
-                { icon: '📈', title: '3. Track, Improve, Repeat', desc: 'View reports, earn/spend credits, and iterate confidently with every submission.' }
+                { icon: '📈', title: '3. Track, Improve, Repeat', desc: 'View reports, compare reviewer feedback, and iterate confidently with every submission.' }
               ].map((item, idx) => (
                 <div key={idx} className="relative p-8 border-2 border-[#bcc1ce] bg-white/60 dark:bg-neutral-900/40 overflow-hidden rounded-lg">
                   <DottedGlowBackground
@@ -147,9 +147,9 @@ const LandingPage = () => {
               {[
                 { title: 'AI-Powered Code Analysis', desc: 'Uses agent-based workflows to detect issues and recommend improvements.' },
                 { title: 'Peer Review Network', desc: 'Connects you with experienced developers who verify and enrich AI findings.' },
-                { title: 'Credit & Staking System', desc: 'Fairly rewards reviewers and gives users control through transparent credit usage.' },
-                { title: 'Real-Time Collaboration', desc: 'Chat, comment, and iterate on reviews directly in your dashboard.' },
-                { title: 'Unified Dashboard', desc: 'Manage your submissions, reviews, and credits from one clean interface.' },
+                { title: 'Reviewer Matching', desc: 'Matches submissions with available reviewers based on reputation and language expertise.' },
+                { title: 'Review Workflow', desc: 'Comment, score, and iterate on reviews directly in your dashboard.' },
+                { title: 'Unified Dashboard', desc: 'Manage your submissions, reviews, and analysis results from one clean interface.' },
                 { title: 'Secure Authentication', desc: 'Powered by Supabase, ensuring privacy and data integrity at every step.' }
               ].map((feature, idx) => (
                 <div key={idx} className="relative p-8 border-2 border-[#bcc1ce] bg-white/60 dark:bg-neutral-900/40 overflow-hidden rounded-lg">
@@ -241,7 +241,7 @@ const LandingPage = () => {
             <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
               {[
                 { quote: "DecentraCode has revolutionized our review process. The AI suggestions combined with human oversight save us countless hours.", author: "Alex P., Lead Developer at InnovateX" },
-                { quote: "The credit system is brilliant. It incentivizes quality reviews and creates a truly engaged community.", author: "Jamie L., Open Source Contributor" },
+                { quote: "The reviewer matching flow is clear and practical. It routes work to people with the right language expertise.", author: "Jamie L., Open Source Contributor" },
                 { quote: "Finally, a platform that makes code reviews transparent and efficient. A game-changer for our team.", author: "Casey R., CTO of DevSolutions" }
               ].map((testimonial, idx) => (
                 <div key={idx} className="relative p-8 border-2 border-[#bcc1ce] bg-white/60 dark:bg-neutral-900/40 rounded-lg flex flex-col justify-between">

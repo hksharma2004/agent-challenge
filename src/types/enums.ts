@@ -14,28 +14,11 @@ export enum SubmissionStatus {
   REVIEWED = "reviewed"
 }
 
-export enum StakingTier {
-  NONE = "none",
-  BRONZE = "bronze",
-  SILVER = "silver",
-  GOLD = "gold"
-}
-
-export enum TransactionType {
-  EARNED = "earned",
-  SPENT = "spent",
-  STAKED = "staked",
-  UNSTAKED = "unstaked"
-}
-
 export enum ActivityType {
   CODE_SUBMITTED = "code_submitted",
   REVIEW_RECEIVED = "review_received",
   REVIEW_GIVEN = "review_given",
-  CREDITS_EARNED = "credits_earned",
-  CREDITS_SPENT = "credits_spent",
   ANALYSIS_COMPLETE = "analysis_complete",
-  STAKING_UPDATED = "staking_updated"
 }
 
 export enum ProgrammingLanguage {

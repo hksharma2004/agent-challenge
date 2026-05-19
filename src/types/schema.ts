@@ -1,8 +1,6 @@
 import type { 
   ReviewStatus, 
   SubmissionStatus, 
-  StakingTier, 
-  TransactionType, 
   ActivityType,
   ProgrammingLanguage,
   CategoryType 
@@ -22,9 +20,6 @@ export interface UserProfile {
   email: string;
   reputation: number;
   level: string;
-  creditsavailable: number;
-  creditsstaked: number;
-  stakingTier: StakingTier;
   totalReviewsGiven: number;
   totalReviewsReceived: number;
   totalSubmissions: number; 
@@ -33,7 +28,6 @@ export interface UserProfile {
 }
 
 export interface QuickStats {
-  creditsBalance: number;
   reputationScore: number;
   totalReviewsGiven: number;
   totalReviewsReceived: number;
@@ -46,7 +40,6 @@ export interface Activity {
   message: string;
   timestamp: Date;
   relatedUser?: string;
-  creditsAmount?: number;
   submissionId?: string;
 }
 
@@ -71,7 +64,6 @@ export interface CodeSubmission {
   categoryScores?: CategoryScores;
   aiInsights?: readonly string[];
   validationHash?: string;
-  creditReward?: number;
   steps?: {
     [stepId: string]: {
       id: string;
@@ -110,22 +102,6 @@ export interface Review {
   feedback: string;
   status: ReviewStatus;
   submittedDate: Date;
-  creditsEarned: number;
-}
-
-export interface CreditTransaction {
-  id: string;
-  type: TransactionType;
-  amount: number;
-  description: string;
-  timestamp: Date;
-  balanceAfter: number;
-}
-
-export interface StakingTierInfo {
-  tier: StakingTier;
-  requiredAmount: number;
-  benefits: readonly string[];
 }
 
 export interface CodeAnalyzerProps {
@@ -147,16 +123,6 @@ export interface ReviewerFlowProps {
   onSubmitReview: (review: Partial<Review>) => void;
 }
 
-export interface CreditsDashboardProps {
-  currentBalance: number;
-  stakedAmount: number;
-  transactions: CreditTransaction[];
-  stakingTiers: StakingTierInfo[];
-  currentTier: StakingTier;
-  onStake: (amount: number) => void;
-  onUnstake: (amount: number) => void;
-}
-
 export interface ProfileReviewsProps {
   userProfile: UserProfile;
   reviews: Review[];
@@ -167,22 +133,6 @@ export interface ProfileReviewsProps {
 export interface ReputationDataPoint {
   date: Date;
   reputation: number;
-}
-
-
-export interface DecentraCodeDashboardProps {
-  currentUser: UserProfile;
-  recentActivities: Activity[];
-  submissions: CodeSubmission[];
-  reviews: Review[];
-  creditTransactions: CreditTransaction[];
-  stakingTiers: StakingTierInfo[];
-  onSubmitCode?: (submission: Partial<CodeSubmission>) => void;
-  onSubmitReview?: (review: Partial<Review>) => void;
-  onStakeCredits?: (amount: number) => void;
-  onUnstakeCredits?: (amount: number) => void;
-  onClaimSubmission?: (submissionId: string) => void;
-  isSocketConnected?: boolean;
 }
 
 export type Json =
@@ -200,11 +150,6 @@ export type Database = {
         Row: UserProfile
         Insert: Partial<UserProfile>
         Update: Partial<UserProfile>
-      }
-      credit_transactions: {
-        Row: CreditTransaction
-        Insert: Partial<CreditTransaction>
-        Update: Partial<CreditTransaction>
       }
       code_submissions: {
         Row: CodeSubmission

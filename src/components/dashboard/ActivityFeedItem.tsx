@@ -1,9 +1,7 @@
 import { formatDateTime } from '@/types/formatters';
 import type { Activity } from '@/types/schema';
-import { Avatar } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { ActivityType } from '@/types/enums';
-import { Code, Star, Coins, CheckCircle, Upload, FileCheck } from 'lucide-react';
+import { Code, Star, CheckCircle, Upload, FileCheck } from 'lucide-react';
 
 interface ActivityFeedItemProps {
   activity: Activity;
@@ -18,14 +16,8 @@ export function ActivityFeedItem({ activity }: ActivityFeedItemProps) {
         return <Star className="h-4 w-4" />;
       case ActivityType.REVIEW_GIVEN:
         return <CheckCircle className="h-4 w-4" />;
-      case ActivityType.CREDITS_EARNED:
-        return <Coins className="h-4 w-4" />;
-      case ActivityType.CREDITS_SPENT:
-        return <Coins className="h-4 w-4" />;
       case ActivityType.ANALYSIS_COMPLETE:
         return <FileCheck className="h-4 w-4" />;
-      case ActivityType.STAKING_UPDATED:
-        return <Code className="h-4 w-4" />;
       default:
         return <Code className="h-4 w-4" />;
     }
@@ -33,10 +25,6 @@ export function ActivityFeedItem({ activity }: ActivityFeedItemProps) {
 
   const getActivityColor = (type: ActivityType) => {
     switch (type) {
-      case ActivityType.CREDITS_EARNED:
-        return 'text-success';
-      case ActivityType.CREDITS_SPENT:
-        return 'text-warning';
       case ActivityType.REVIEW_RECEIVED:
       case ActivityType.ANALYSIS_COMPLETE:
         return 'text-info';
@@ -56,11 +44,6 @@ export function ActivityFeedItem({ activity }: ActivityFeedItemProps) {
           {formatDateTime(activity.timestamp)}
         </p>
       </div>
-      {activity.creditsAmount && (
-        <Badge variant="secondary" className="shrink-0">
-          +{activity.creditsAmount} DCC
-        </Badge>
-      )}
     </div>
   );
 }
