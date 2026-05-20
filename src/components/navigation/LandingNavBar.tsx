@@ -169,10 +169,7 @@ export function LandingNavBar() {
 
           <div className="hidden md:flex items-center gap-4">
             <Button variant="default" size="lg" asChild className="bg-neon-green text-black hover:bg-neon-green/80 focus-visible:ring-neon-green h-11 px-6 text-base">
-              <Link href="/signup">Get started</Link>
-            </Button>
-            <Button variant="ghost" size="lg" asChild className="h-11 px-4 text-base text-neutral-700 hover:text-black focus-visible:ring-neon-green">
-              <Link href="/signin">Sign in</Link>
+              <Link href="/dashboard/analyze">Get started</Link>
             </Button>
           </div>
 
@@ -223,10 +220,7 @@ export function LandingNavBar() {
                   ))}
                   <div className="flex flex-col gap-4 mt-4">
                     <Button variant="default" asChild className="bg-neon-green text-black hover:bg-neon-green/80 focus-visible:ring-neon-green h-11 text-base">
-                      <Link href="/signup">Get started</Link>
-                    </Button>
-                    <Button variant="outline" asChild className="h-11 text-base text-neutral-700 hover:text-black focus-visible:ring-neon-green">
-                      <Link href="/signin">Sign in</Link>
+                      <Link href="/dashboard/analyze">Get started</Link>
                     </Button>
                   </div>
                 </div>

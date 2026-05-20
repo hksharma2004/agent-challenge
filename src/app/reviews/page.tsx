@@ -25,8 +25,6 @@ export default function ReviewsPage() {
   };
 
   const handleFetch = async () => {
-    alert("handleFetch called!"); 
-    console.log("handleFetch called!"); 
     if (!reviewerId) {
       setError("Please enter a reviewer ID.");
       return;
@@ -34,7 +32,6 @@ export default function ReviewsPage() {
     setIsLoading(true);
     setError(null);
     try {
-      console.log("Fetching reviewer data for ID:", reviewerId);
       const response = await fetch("/api/workflows/reviewer-info", {
         method: "POST",
         headers: {
@@ -43,15 +40,12 @@ export default function ReviewsPage() {
         body: JSON.stringify({ reviewerId }),
       });
 
-      console.log("Response status:", response.status);
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("Failed to fetch reviewer data:", errorText);
         throw new Error(`Failed to fetch reviewer data: ${errorText}`);
       }
 
       const data = await response.json();
-      console.log("Fetched data:", data);
       setReviewerData(data);
     } catch (err) {
       console.error("Error in handleFetch:", err);

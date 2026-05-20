@@ -65,8 +65,9 @@ pnpm run dev:agent   # Port 4111
 
 **Key Environment Variables:**
 ```env
-OLLAMA_API_URL=https://3yt39qx97wc9hqwwmylrphi4jsxrngjzxnbw.node.k8s.prd.nos.ci/api
-MODEL_NAME_AT_ENDPOINT=qwen3:8b
+OPENROUTER_API_URL=https://openrouter.ai/api/v1
+MODEL_NAME=openrouter/owl-alpha
+OPENROUTER_API_KEY=your_openrouter_key
 DATABASE_URL=your_postgresql_url
 GITHUB_PAT=your_github_token
 ```

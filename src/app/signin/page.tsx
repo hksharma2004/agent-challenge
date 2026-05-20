@@ -14,7 +14,7 @@ function SignInContent() {
     const handleAuth = async () => {
       const session = await handleAuthRedirect();
       if (session) {
-        const redirectTo = searchParams?.get("redirectTo") || "/dashboard";
+        const redirectTo = searchParams?.get("redirectTo") || "/dashboard/analyze";
         router.push(redirectTo);
       }
     };

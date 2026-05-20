@@ -14,12 +14,6 @@ RUN apt-get update && apt-get install -y \
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
-# Disable Analytics/Telemetry
-ENV DISABLE_TELEMETRY=true
-ENV POSTHOG_DISABLED=true
-ENV MASTRA_TELEMETRY_DISABLED=true
-ENV DO_NOT_TRACK=1
-
 # Ensure logs are visible (disable buffering)
 ENV PYTHONUNBUFFERED=1
 

@@ -3,14 +3,7 @@ import { z } from "zod";
 import { Agent } from "@mastra/core/agent";
 import { Memory } from "@mastra/memory";
 import { LibSQLStore } from "@mastra/libsql";
-import { createOpenAI } from "@ai-sdk/openai";
-
-const openai = createOpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: process.env.OPENAI_API_URL,
-});
-
-const modelConfig = openai(process.env.MODEL_NAME || "Qwen3.5-27B-AWQ-4bit") as any;
+import { modelConfig } from "./modelConfig";
 
 const sharedMemory = new Memory({
   storage: new LibSQLStore({ url: ":memory:" }),

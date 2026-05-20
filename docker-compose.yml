@@ -23,7 +23,6 @@ services:
       - "4111:4111"
     environment:
       - DATABASE_URL=postgres://dev:devpass@postgres:5432/decentracode
-      - MASTRA_TELEMETRY_DISABLED=1
     env_file:
       - .env
     depends_on:

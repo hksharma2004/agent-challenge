@@ -110,8 +110,19 @@ export const repoAnalysisWorkflow = createWorkflow({
         .map((f: any) => `File: ${f.path}\nContent:\n${f.content.substring(0, 1000)}\n---`)
         .join('\n\n');
 
-      const createPrompt = (specialty: string) => 
-        `Analyze the following repository files for ${specialty} and provide a concise summary of your findings:\n\n${repoContext}`;
+      const createPrompt = (specialty: string) =>
+        `Analyze the following repository files for ${specialty}.
+
+Return ONLY concise GitHub-flavored Markdown:
+- Start with a one-sentence overall assessment.
+- Then provide at most 5 bullet points.
+- Each bullet must be 1-2 short sentences.
+- Include file paths in inline code when relevant.
+- Do not include tables, long excerpts, emoji, horizontal rules, or nested sections.
+
+Repository files:
+
+${repoContext}`;
 
       try {
         const [securityRes, performanceRes, testingRes, docsRes, architectureRes] = await Promise.all([
@@ -122,7 +133,7 @@ export const repoAnalysisWorkflow = createWorkflow({
           architectureAgent.generate(createPrompt('architectural patterns and code structure')),
         ]);
 
-        const codeQualitySummary = `Performance: ${performanceRes.text}\n\nArchitecture: ${architectureRes.text}`;
+        const codeQualitySummary = `**Performance**\n\n${performanceRes.text}\n\n**Architecture**\n\n${architectureRes.text}`;
 
         return {
           codeQuality: codeQualitySummary,

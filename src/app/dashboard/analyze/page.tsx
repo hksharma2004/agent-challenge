@@ -2,13 +2,9 @@
 
 import { useState } from "react"
 import { TopNavBar } from "@/components/navigation/TopNavBar";
-import Link from "next/link"
 import { motion } from "framer-motion";
 import {
   Code2,
-  Bell,
-  LogOut,
-  ArrowRight,
   Github,
   AlertTriangle,
   Loader2,
@@ -18,7 +14,6 @@ import {
   FlaskConical, 
   BookOpen, 
 } from "lucide-react"
-import CodeHealthMetricsDisplay from "@/components/analysis/CodeHealthMetricsDisplay";
 import AnalysisResultCard from "@/components/analysis/AnalysisResultCard";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
@@ -45,6 +40,12 @@ type ReaderWorkflowResult = {
 type CombinedAnalysisResult = {
   analysis: AnalysisWorkflowResult;
   reader: ReaderWorkflowResult;
+};
+
+const getWorkflowStepOutput = (event: any) => {
+  if (event.type !== "workflow-step-result") return null;
+  if (event.payload?.status !== "success") return null;
+  return event.payload.output || event.payload.payload || null;
 };
 
 export default function AnalyzePage() {
@@ -110,59 +111,41 @@ export default function AnalyzePage() {
           throw new Error('Server returned HTML error page instead of JSON stream. Check the server logs.');
         }
 
-        let startIdx = 0;
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || "";
 
-        while (startIdx < buffer.length) {
-          const openBraceIdx = buffer.indexOf('{', startIdx);
-          if (openBraceIdx === -1) {
-            buffer = "";
-            break;
-          }
-
-          // Find matching closing brace
-          let depth = 0;
-          let closeBraceIdx = -1;
-          for (let i = openBraceIdx; i < buffer.length; i++) {
-            if (buffer[i] === '{') depth++;
-            else if (buffer[i] === '}') {
-              depth--;
-              if (depth === 0) {
-                closeBraceIdx = i;
-                break;
-              }
-            }
-          }
-
-          if (closeBraceIdx === -1) {
-            // Incomplete JSON — wait for more chunks
-            buffer = buffer.substring(openBraceIdx);
-            break;
-          }
-
+        for (const line of lines) {
+          if (!line.trim()) continue;
           try {
-            const jsonStr = buffer.substring(openBraceIdx, closeBraceIdx + 1);
-            const event = JSON.parse(jsonStr);
+            const event = JSON.parse(line);
             setStreamingEvents(prev => [...prev, event]);
 
-            if (event.type === 'workflow-result') {
-              if (event.source === 'analysis') {
-                accumulatedResult.analysis = event.payload;
-              } else if (event.source === 'reader') {
-                accumulatedResult.reader = event.payload;
-              }
+            const stepOutput = getWorkflowStepOutput(event);
+            if (event.source === 'analysis' && event.payload?.id === 'format-json-step' && stepOutput) {
+              accumulatedResult.analysis = stepOutput;
+            } else if (event.source === 'reader' && event.payload?.id === 'read-repo-step' && stepOutput) {
+              accumulatedResult.reader = stepOutput;
             }
-
-            startIdx = closeBraceIdx + 1;
           } catch (e) {
-            // Skip past this opening brace and try the next one
-            console.error("Malformed JSON object, skipping");
-            startIdx = openBraceIdx + 1;
+            console.error("Malformed JSON line, skipping", line);
           }
         }
+      }
 
-        // Clear fully processed buffer
-        if (startIdx > 0 && startIdx <= buffer.length) {
-          buffer = buffer.substring(startIdx);
+      const finalLine = buffer.trim();
+      if (finalLine) {
+        try {
+          const event = JSON.parse(finalLine);
+          setStreamingEvents(prev => [...prev, event]);
+
+          const stepOutput = getWorkflowStepOutput(event);
+          if (event.source === 'analysis' && event.payload?.id === 'format-json-step' && stepOutput) {
+            accumulatedResult.analysis = stepOutput;
+          } else if (event.source === 'reader' && event.payload?.id === 'read-repo-step' && stepOutput) {
+            accumulatedResult.reader = stepOutput;
+          }
+        } catch (e) {
+          console.error("Malformed final JSON line, skipping", finalLine);
         }
       }
 
@@ -349,12 +332,10 @@ export default function AnalyzePage() {
                 <div className="flex-1 border-t border-neutral-200" />
               </div>
               <Accordion type="single" collapsible className="w-full max-w-4xl mx-auto">
-                {combinedResult.reader.files?.map((file, index) => (
+                {combinedResult.reader.files?.length ? combinedResult.reader.files.map((file, index) => (
                   <AccordionItem value={`item-${index}`} key={index} className="border-b border-neutral-200 hover:bg-neutral-50 transition-colors">
                     <AccordionTrigger className="text-lg font-medium text-black hover:text-green-500 px-4 py-3 flex items-center gap-2">
-                      {file.path.endsWith('.md') && <span className="text-neutral-500">📄</span>}
-                      {file.path.endsWith('.py') && <span className="text-neutral-500">🐍</span>}
-                      {file.path.endsWith('.yaml') && <span className="text-neutral-500">⚙️</span>}
+                      <FileText className="h-4 w-4 text-neutral-500" />
                       {file.path}
                     </AccordionTrigger>
                     <AccordionContent>
@@ -363,20 +344,12 @@ export default function AnalyzePage() {
                       </pre>
                     </AccordionContent>
                   </AccordionItem>
-                ))}
+                )) : (
+                  <p className="rounded-xl border border-neutral-200 bg-neutral-50 p-6 text-center text-neutral-500">
+                    {combinedResult.reader.error || "No repository files were extracted."}
+                  </p>
+                )}
               </Accordion>
-            </motion.section>
-
-
-            <motion.section
-              className="my-20 opacity-0 animate-fade-in transition-opacity duration-700 ease-out"
-              variants={sectionVariants}
-              initial="hidden"
-              animate="visible"
-              transition={{ delay: 0.6 }}
-            >
-              <h2 className="mb-10 text-center text-4xl font-bold text-black">Code Health Metrics</h2>
-              <CodeHealthMetricsDisplay />
             </motion.section>
           </>
         )}

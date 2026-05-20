@@ -92,7 +92,7 @@ export default function SubmissionForm() {
       transition={{ delay: 0.1 }}
     >
       <div className="relative w-full max-w-3xl">
-        <Link href="/dashboard" className="absolute top-0 left-0 -mt-16 flex items-center text-gray-600 hover:text-green-400 transition-colors duration-200">
+        <Link href="/dashboard/analyze" className="absolute top-0 left-0 -mt-16 flex items-center text-gray-600 hover:text-green-400 transition-colors duration-200">
           <ArrowLeftIcon className="h-5 w-5 mr-2" />
           Back to Dashboard
         </Link>

@@ -51,14 +51,9 @@ const LandingPage = () => {
 
         <BlurFade delay={0.2} inView>
           <div className="max-w-2xl mx-auto mt-10 flex justify-center gap-4 px-4">
-            <Link href="/signup" passHref>
+            <Link href="/dashboard/analyze" passHref>
               <Button className="bg-[#4CAF50] text-white hover:bg-[#45a049] transition-colors duration-300 px-8 py-6 text-base">
-                Sign Up
-              </Button>
-            </Link>
-            <Link href="/signin" passHref>
-              <Button variant="outline" className="border-2 border-neutral-300 text-neutral-700 hover:bg-neutral-100 transition-colors duration-300 px-8 py-6 text-base">
-                Sign In
+                Get Started
               </Button>
             </Link>
           </div>
@@ -273,7 +268,7 @@ const LandingPage = () => {
             <p className="text-neutral-600 max-w-2xl mx-auto text-base md:text-lg leading-relaxed mb-10">
               Join DecentraCode and experience transparent, AI-augmented code reviews designed for modern developers.
             </p>
-            <Link href="/signup" passHref>
+            <Link href="/dashboard/analyze" passHref>
               <Button className="bg-[#4CAF50] px-10 py-6 rounded-xl text-white text-lg hover:bg-[#45a049] transition-colors duration-300 shadow-lg hover:shadow-xl">
                 Get Started
               </Button>

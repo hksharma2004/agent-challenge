@@ -17,7 +17,6 @@ const nextConfig = {
   serverExternalPackages: [
     '@mastra/core',
     '@mastra/libsql',
-    '@mastra/mcp',
     '@mastra/memory',
     'mastra'
   ],
@@ -36,7 +35,6 @@ const nextConfig = {
       config.externals.push({
         '@mastra/core': 'commonjs @mastra/core',
         '@mastra/libsql': 'commonjs @mastra/libsql',
-        '@mastra/mcp': 'commonjs @mastra/mcp',
         '@mastra/memory': 'commonjs @mastra/memory',
         'mastra': 'commonjs mastra',
       });
@@ -61,12 +59,6 @@ const nextConfig = {
 
     // ✅ Alias the problematic file directly
     config.resolve.alias['@libsql/hrana-client/LICENSE'] = false;
-
-    // Handle .flf font files
-    config.module.rules.push({
-      test: /\.flf$/,
-      type: 'asset/source', // Use asset/source to treat as raw text
-    });
 
     return config;
   },

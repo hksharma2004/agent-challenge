@@ -27,7 +27,7 @@ fi
 
 if [ ! -f .env ]; then
     echo "Warning: .env file is missing! Your application may not start correctly without it."
-    echo "Please create the .env file with your OPENAI_API_URL, OPENAI_API_KEY, etc."
+    echo "Please create the .env file with your OPENROUTER_API_URL, OPENROUTER_API_KEY, MODEL_NAME, etc."
 fi
 
 echo "Building and starting containers in detached mode..."
