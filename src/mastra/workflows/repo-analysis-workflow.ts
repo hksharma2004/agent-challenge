@@ -1,5 +1,6 @@
 import { createWorkflow, createStep } from '@mastra/core/workflows';
 import { z } from 'zod';
+import fs from 'fs';
 import { repositoryClonerTool } from '../tools/repository';
 import { repositoryReaderTool } from '../tools/repository-reader-tool';
 import { jsonFormatterTool } from '../tools/json-formatter-tool';
@@ -70,14 +71,18 @@ export const repoAnalysisWorkflow = createWorkflow({
       error: z.string().optional(),
     }),
     execute: async ({ inputData, runtimeContext }) => {
-      const result = await repositoryReaderTool.execute({
-        context: { repoPath: inputData.path },
-        runtimeContext,
-      });
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to read repository');
+      try {
+        const result = await repositoryReaderTool.execute({
+          context: { repoPath: inputData.path },
+          runtimeContext,
+        });
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to read repository');
+        }
+        return result;
+      } finally {
+        await fs.promises.rm(inputData.path, { recursive: true, force: true });
       }
-      return result;
     },
   })
 )

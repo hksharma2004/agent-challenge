@@ -20,9 +20,9 @@ export const repositoryClonerTool = createTool({
     error: z.string().optional().describe('Error message if the operation failed'),
   }),
   execute: async ({ context }) => {
+    const dir = path.join(os.tmpdir(), `repo-${Date.now()}`);
     try {
       const { url, token } = context;
-      const dir = path.join(os.tmpdir(), `repo-${Date.now()}`);
       
       await fs.promises.mkdir(dir, { recursive: true });
 
@@ -49,6 +49,7 @@ export const repositoryClonerTool = createTool({
         success: true,
       };
     } catch (error) {
+      await fs.promises.rm(dir, { recursive: true, force: true });
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       return {
         path: '',
