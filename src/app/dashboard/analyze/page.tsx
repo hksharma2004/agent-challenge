@@ -13,6 +13,9 @@ import {
   Shield, 
   FlaskConical, 
   BookOpen, 
+  CheckCircle2,
+  Circle,
+  XCircle,
 } from "lucide-react"
 import AnalysisResultCard from "@/components/analysis/AnalysisResultCard";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -42,10 +45,93 @@ type CombinedAnalysisResult = {
   reader: ReaderWorkflowResult;
 };
 
+type WorkflowStepStatus = "pending" | "running" | "success" | "error";
+
+type WorkflowStepLogItem = {
+  id: string;
+  label: string;
+  source: "analysis" | "reader";
+  status: WorkflowStepStatus;
+  message?: string;
+};
+
+const WORKFLOW_STEPS: Array<Omit<WorkflowStepLogItem, "status" | "message">> = [
+  { id: "clone-repo-step", label: "Clone Repo Step", source: "analysis" },
+  { id: "read-repo-step", label: "Read Repo Step", source: "analysis" },
+  { id: "analyze-code-step", label: "Analyze Code Step", source: "analysis" },
+  { id: "format-json-step", label: "Formatted Output Step", source: "analysis" },
+];
+
 const getWorkflowStepOutput = (event: any) => {
   if (event.type !== "workflow-step-result") return null;
   if (event.payload?.status !== "success") return null;
   return event.payload.output || event.payload.payload || null;
+};
+
+const normalizeStepStatus = (status?: string): WorkflowStepStatus => {
+  if (status === "success") return "success";
+  if (status === "error" || status === "failed" || status === "failure") return "error";
+  if (status === "running" || status === "started" || status === "in_progress") return "running";
+  return "pending";
+};
+
+const buildWorkflowStepLog = (
+  events: any[],
+  isLoading: boolean,
+  hasResult: boolean,
+  error: string | null
+): WorkflowStepLogItem[] => {
+  const steps = WORKFLOW_STEPS.map((step) => ({
+    ...step,
+    status: "pending" as WorkflowStepStatus,
+    message: undefined as string | undefined,
+  }));
+
+  if (isLoading || events.length > 0 || hasResult) {
+    steps[0].status = "running";
+  }
+
+  for (const event of events) {
+    const stepId = event.payload?.id;
+    const index = steps.findIndex(
+      (step) => step.id === stepId && step.source === event.source
+    );
+
+    if (index === -1) continue;
+
+    const status = normalizeStepStatus(event.payload?.status);
+    if (event.type === "workflow-step-result" || status !== "pending") {
+      steps[index].status = status;
+      steps[index].message = event.payload?.error || event.payload?.message;
+
+      if (status === "success" && steps[index + 1]?.status === "pending") {
+        steps[index + 1].status = "running";
+      }
+    }
+  }
+
+  if (hasResult) {
+    steps.forEach((step) => {
+      step.status = "success";
+    });
+  }
+
+  if (error) {
+    const runningStep = steps.find((step) => step.status === "running");
+    if (runningStep) {
+      runningStep.status = "error";
+      runningStep.message = error;
+    }
+  }
+
+  return steps;
+};
+
+const getStepIcon = (status: WorkflowStepStatus) => {
+  if (status === "success") return <CheckCircle2 className="h-5 w-5 text-green-500" aria-hidden="true" />;
+  if (status === "error") return <XCircle className="h-5 w-5 text-red-500" aria-hidden="true" />;
+  if (status === "running") return <Loader2 className="h-5 w-5 text-green-500 animate-spin" aria-hidden="true" />;
+  return <Circle className="h-5 w-5 text-neutral-300" aria-hidden="true" />;
 };
 
 export default function AnalyzePage() {
@@ -55,6 +141,7 @@ export default function AnalyzePage() {
   const [combinedResult, setCombinedResult] = useState<CombinedAnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [streamingEvents, setStreamingEvents] = useState<any[]>([]);
+  const workflowStepLog = buildWorkflowStepLog(streamingEvents, isLoading, Boolean(combinedResult), error);
 
   const sectionVariants = {
     hidden: { opacity: 0, y: 20, filter: 'blur(10px)' },
@@ -230,7 +317,7 @@ export default function AnalyzePage() {
           </div>
         </motion.section>
 
-        {isLoading && !error && (
+        {(isLoading || Boolean(combinedResult)) && !error && (
           <motion.div
             className="mx-auto max-w-2xl my-20 rounded-xl border border-neutral-200 bg-neutral-50 p-8 shadow-sm"
             variants={sectionVariants}
@@ -239,29 +326,44 @@ export default function AnalyzePage() {
             transition={{ delay: 0.3 }}
           >
             <div className="flex items-center gap-3 mb-6">
-              <Loader2 className="h-6 w-6 text-green-500 animate-spin" aria-hidden="true" />
-              <p className="text-xl font-semibold text-neutral-800">Analysis in progress...</p>
+              {isLoading ? (
+                <Loader2 className="h-6 w-6 text-green-500 animate-spin" aria-hidden="true" />
+              ) : (
+                <CheckCircle2 className="h-6 w-6 text-green-500" aria-hidden="true" />
+              )}
+              <p className="text-xl font-semibold text-neutral-800">
+                {isLoading ? "Analysis in progress..." : "Workflow completed"}
+              </p>
             </div>
             
-            <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar text-left">
-              {streamingEvents.map((event, idx) => (
-                <div key={idx} className="flex items-start gap-3 p-3 rounded-lg bg-white border border-neutral-100 animate-in fade-in slide-in-from-left-2 duration-300">
-                  <div className="mt-1 h-2 w-2 rounded-full bg-green-400 shrink-0" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-neutral-700">
-                      {event.type.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
-                      {event.payload?.stepName && <span className="text-green-600 ml-2">[{event.payload.stepName}]</span>}
+            <div className="space-y-3 text-left" aria-live="polite" aria-label="Workflow progress log">
+              {workflowStepLog.map((step) => (
+                <div
+                  key={step.id}
+                  className="flex items-start gap-3 rounded-lg border border-neutral-100 bg-white p-3 animate-in fade-in slide-in-from-left-2 duration-300"
+                >
+                  <div className="mt-0.5 shrink-0">{getStepIcon(step.status)}</div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-neutral-800">
+                      {step.label} <span className={
+                        step.status === "success"
+                          ? "text-green-600"
+                          : step.status === "error"
+                            ? "text-red-600"
+                            : step.status === "running"
+                              ? "text-green-600"
+                              : "text-neutral-400"
+                      }>[{step.status}]</span>
                     </p>
-                    {event.payload?.status && (
-                      <p className="text-xs text-neutral-500 mt-1 capitalize">Status: {event.payload.status}</p>
+                    {step.message && (
+                      <p className="mt-1 text-xs text-neutral-500">{step.message}</p>
                     )}
                   </div>
-                  <span className="text-[10px] font-mono text-neutral-400 capitalize">{event.source || 'system'}</span>
+                  <span className="text-[10px] font-mono uppercase tracking-wide text-neutral-400">
+                    {step.source}
+                  </span>
                 </div>
               ))}
-              {streamingEvents.length === 0 && (
-                <p className="text-sm text-neutral-400 italic text-center py-4">Waiting for workflow to initialize...</p>
-              )}
             </div>
           </motion.div>
         )}
